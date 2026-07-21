@@ -400,6 +400,67 @@ def _(mo):
     mo.md(r"""
     ------
 
+    ## Additional activity: predict, observe, explain
+
+    **Predict** first (before touching anything), then **observe** using the
+    Ball 1 and Ball 2 sliders further up the page, then **explain** what you saw.
+
+    Start with **Ball 1 at mass = 10 kg, velocity = 4 m/s**. You are going to
+    **double the velocity to 8 m/s** (leaving the mass at 10 kg).
+
+    **Predict:** what will happen to Ball 1's momentum bar?
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    poe_predict = mo.ui.radio(
+        options=[
+            "It stays the same",
+            "It doubles",
+            "It halves",
+            "It goes up by 10",
+        ],
+        label="My prediction:",
+    )
+    poe_predict
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    poe_explain = mo.ui.text_area(
+        placeholder="Now move Ball 1's velocity slider to 8 m/s. What happened to the momentum, and why?",
+        label="Observe, then explain:",
+        full_width=True,
+    )
+    poe_explain
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.accordion(
+        {
+            "Reveal answer": mo.md(
+                """
+                **It doubles.** Momentum is $p = mv$. The mass is unchanged, so
+                doubling the velocity doubles the momentum: it goes from
+                $10 \\times 4 = 40$ kg m/s to $10 \\times 8 = 80$ kg m/s.
+                Momentum is *directly proportional* to velocity.
+                """
+            )
+        }
+    )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ------
+
     **Next:** Part 2 looks at what happens to momentum when a force acts, the
     idea of **impulse**, $\Delta p = F_{net}\Delta t$.
 
