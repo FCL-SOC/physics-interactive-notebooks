@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="./favicon.ico" />
+    <!-- Preload is necessary because we show these images when we disconnect from the server,
+    but at that point we cannot load these images from the server -->
+    <link rel="preload" href="./assets/gradient-yHQUC_QB.png" as="image" />
+    <link rel="preload" href="./assets/noise-60BoTA8O.png" as="image" />
+    <!-- Preload the fonts -->
+    <link rel="preload" href="./assets/Lora-VariableFont_wght-CZceb_kH.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="./assets/PTSans-Regular-Bam3NpBI.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="./assets/PTSans-Bold-C_DwAp7Z.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="./assets/FiraMono-Regular-CEsLFVD9.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="./assets/FiraMono-Medium-D5MAsWEG.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="./assets/FiraMono-Bold-C6PDArdf.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="a marimo app" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.json" />
+
+    <script data-marimo="true">
+      function __resizeIframe(obj) {
+        const scrollbarHeight = 20; // Max between windows, mac, and linux
+
+        function setHeight() {
+          // Guard against race condition where iframe isn't ready
+          if (!obj.contentWindow?.document?.documentElement) {
+            return;
+          }
+          const element = obj.contentWindow.document.documentElement;
+          // If there is no vertical scrollbar, we don't need to resize the iframe
+          if (element.scrollHeight === element.clientHeight) {
+            return;
+          }
+
+          // Create a new height that includes the scrollbar height if it's visible
+          const hasHorizontalScrollbar = element.scrollWidth > element.clientWidth;
+          const newHeight = element.scrollHeight + (hasHorizontalScrollbar ? scrollbarHeight : 0);
+
+          // Only update the height if it's different from the current height
+          if (obj.style.height !== `${newHeight}px`) {
+            obj.style.height = `${newHeight}px`;
+          }
+        }
+
+        // Resize the iframe to the height of the content and bottom scrollbar height
+        setHeight();
+
+        // Resize the iframe when the content changes
+        const resizeObserver = new ResizeObserver((_entries) => {
+          setHeight();
+        });
+        // Only observe if iframe content is ready
+        if (obj.contentWindow?.document?.body) {
+          resizeObserver.observe(obj.contentWindow.document.body);
+        }
+      }
+    </script>
+    <marimo-filename hidden>notebook.py</marimo-filename>
+    <!-- TODO(Trevor): Legacy, required by VS Code plugin. Remove when plugin is updated (see marimo/server/_templates/template.py) -->
+    <marimo-version data-version="{{ version }}" hidden></marimo-version>
+    <marimo-user-config data-config="{{ user_config }}" hidden></marimo-user-config>
+    <marimo-server-token data-token="{{ server_token }}" hidden></marimo-server-token>
+    <!-- /TODO -->
+    <title>momentum-part4</title>
+    <script type="module" crossorigin src="./assets/index-Dbvu7Fs-.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/preload-helper-BW0IMuFq.js">
+    <link rel="modulepreload" crossorigin href="./assets/chunk-LvLJmgfZ.js">
+    <link rel="modulepreload" crossorigin href="./assets/react-Bj1aDYRI.js">
+    <link rel="modulepreload" crossorigin href="./assets/compiler-runtime-B3qBwwSJ.js">
+    <link rel="modulepreload" crossorigin href="./assets/jsx-runtime-PbYoItBR.js">
+    <link rel="modulepreload" crossorigin href="./assets/useEventListener-BakX-tnw.js">
+    <link rel="modulepreload" crossorigin href="./assets/defaultLocale-OkOxlkkM.js">
+    <link rel="modulepreload" crossorigin href="./assets/precisionRound-BOmLQIKI.js">
+    <link rel="modulepreload" crossorigin href="./assets/defaultLocale-DK1MWd7f.js">
+    <link rel="modulepreload" crossorigin href="./assets/vega-loader.browser-CZV6_g2i.js">
+    <link rel="modulepreload" crossorigin href="./assets/utils-DPvpQ891.js">
+    <link rel="modulepreload" crossorigin href="./assets/clsx-BtEcuwwV.js">
+    <link rel="modulepreload" crossorigin href="./assets/cn-X2M2usMq.js">
+    <link rel="modulepreload" crossorigin href="./assets/badge-6yGCqY1Z.js">
+    <link rel="modulepreload" crossorigin href="./assets/button-BF7GSjhW.js">
+    <link rel="modulepreload" crossorigin href="./assets/react-dom-CSu739Rf.js">
+    <link rel="modulepreload" crossorigin href="./assets/fullscreen-BXI8V5i6.js">
+    <link rel="modulepreload" crossorigin href="./assets/menu-items-CQMqwayA.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-DCqDlsgq.js">
+    <link rel="modulepreload" crossorigin href="./assets/createLucideIcon-BTp1tQDO.js">
+    <link rel="modulepreload" crossorigin href="./assets/check-DQmqoJgr.js">
+    <link rel="modulepreload" crossorigin href="./assets/x-9vLEgLY6.js">
+    <link rel="modulepreload" crossorigin href="./assets/select-Cjly7tmx.js">
+    <link rel="modulepreload" crossorigin href="./assets/tooltip-CgQpRVyN.js">
+    <link rel="modulepreload" crossorigin href="./assets/use-toast-kCNiuc-_.js">
+    <link rel="modulepreload" crossorigin href="./assets/useEvent-D91BmmQi.js">
+    <link rel="modulepreload" crossorigin href="./assets/invariant-C2E8KCbD.js">
+    <link rel="modulepreload" crossorigin href="./assets/isObject-DvLSfCY5.js">
+    <link rel="modulepreload" crossorigin href="./assets/_baseFor-DKD1r8uL.js">
+    <link rel="modulepreload" crossorigin href="./assets/merge-_9WLTEyt.js">
+    <link rel="modulepreload" crossorigin href="./assets/zod-H_cgTO0M.js">
+    <link rel="modulepreload" crossorigin href="./assets/utils-CCzEbCvM.js">
+    <link rel="modulepreload" crossorigin href="./assets/Deferred-BMfCOLaw.js">
+    <link rel="modulepreload" crossorigin href="./assets/uuid-ClFZlR7U.js">
+    <link rel="modulepreload" crossorigin href="./assets/DeferredRequestRegistry-RuL7NV1n.js">
+    <link rel="modulepreload" crossorigin href="./assets/constants-B9JJ72XE.js">
+    <link rel="modulepreload" crossorigin href="./assets/session-CsT5Gg9j.js">
+    <link rel="modulepreload" crossorigin href="./assets/config-Vyzo6FSF.js">
+    <link rel="modulepreload" crossorigin href="./assets/requests-KshNNAOp.js">
+    <link rel="modulepreload" crossorigin href="./assets/useLifecycle-Baf35rp4.js">
+    <link rel="modulepreload" crossorigin href="./assets/useNonce-0SWz6w4W.js">
+    <link rel="modulepreload" crossorigin href="./assets/useTheme-COorCcXC.js">
+    <link rel="modulepreload" crossorigin href="./assets/arrays-DWxvyYxP.js">
+    <link rel="modulepreload" crossorigin href="./assets/strings-DvZlHYnD.js">
+    <link rel="modulepreload" crossorigin href="./assets/once-CXj_gH7S.js">
+    <link rel="modulepreload" crossorigin href="./assets/capabilities-CjNGDxxx.js">
+    <link rel="modulepreload" crossorigin href="./assets/createReducer-3wF4dU7I.js">
+    <link rel="modulepreload" crossorigin href="./assets/paths-DhuNSnZ_.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-Dez1I5M9.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-B0WqBUnf.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-CwfKvuyQ.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-CNKFZCiw.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-ZjSH4Z6x.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-D-2yWcX9.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-DblYTes5.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-BtrqKtvn.js">
+    <link rel="modulepreload" crossorigin href="./assets/dist-CfGDksO-.js">
+    <link rel="modulepreload" crossorigin href="./assets/stex-0ac7Aukl.js">
+    <link rel="modulepreload" crossorigin href="./assets/toDate-DCE7d2fN.js">
+    <link rel="modulepreload" crossorigin href="./assets/purify.es-DfJp_of2.js">
+    <link rel="modulepreload" crossorigin href="./assets/cjs-DXo9vDEJ.js">
+    <link rel="modulepreload" crossorigin href="./assets/isSymbol-BT6B8Bon.js">
+    <link rel="modulepreload" crossorigin href="./assets/now-CsYTPAhW.js">
+    <link rel="modulepreload" crossorigin href="./assets/debounce-OiXznToA.js">
+    <link rel="modulepreload" crossorigin href="./assets/database-zap-DIlSqcdp.js">
+    <link rel="modulepreload" crossorigin href="./assets/main-DmhaVp6Y.js">
+    <link rel="modulepreload" crossorigin href="./assets/cells-ChH37lAD.js">
+    <link rel="modulepreload" crossorigin href="./assets/kbd-UVzWBHfi.js">
+    <link rel="modulepreload" crossorigin href="./assets/useInstallPackage-C1Dd0aIZ.js">
+    <link rel="modulepreload" crossorigin href="./assets/alert-dialog-CC0gG4Av.js">
+    <link rel="modulepreload" crossorigin href="./assets/dialog-DkJmIrsG.js">
+    <link rel="modulepreload" crossorigin href="./assets/useDebounce-CpLI2dsc.js">
+    <link rel="modulepreload" crossorigin href="./assets/numbers-_ry1Nlla.js">
+    <link rel="modulepreload" crossorigin href="./assets/SSRProvider-DX2edArU.js">
+    <link rel="modulepreload" crossorigin href="./assets/context-C2Ie4tn_.js">
+    <link rel="modulepreload" crossorigin href="./assets/useNumberFormatter-CuxZh3Bq.js">
+    <link rel="modulepreload" crossorigin href="./assets/usePress-BSFUeqnS.js">
+    <link rel="modulepreload" crossorigin href="./assets/input-DB2LiTiQ.js">
+    <link rel="modulepreload" crossorigin href="./assets/ImperativeModal-B62Q6S9l.js">
+    <link rel="modulepreload" crossorigin href="./assets/cell-link-BZg1pgHT.js">
+    <link rel="modulepreload" crossorigin href="./assets/config-CjCV0n0j.js">
+    <link rel="modulepreload" crossorigin href="./assets/alert-1y_DnRWn.js">
+    <link rel="modulepreload" crossorigin href="./assets/chevron-right-C7RH0Nc7.js">
+    <link rel="modulepreload" crossorigin href="./assets/dropdown-menu-DfGLyCbP.js">
+    <link rel="modulepreload" crossorigin href="./assets/links-CCkJpphF.js">
+    <link rel="modulepreload" crossorigin href="./assets/useRunCells-Dmf7GVGt.js">
+    <link rel="modulepreload" crossorigin href="./assets/copy-D8MtpXgN.js">
+    <link rel="modulepreload" crossorigin href="./assets/copy-IBNGDypD.js">
+    <link rel="modulepreload" crossorigin href="./assets/copy-icon-EHMT-qlr.js">
+    <link rel="modulepreload" crossorigin href="./assets/RenderHTML-DZz6EFTa.js">
+    <link rel="modulepreload" crossorigin href="./assets/datasource-ii4hOmhM.js">
+    <link rel="modulepreload" crossorigin href="./assets/state-DIDUL4YY.js">
+    <link rel="modulepreload" crossorigin href="./assets/hat-glasses-DlK0E4SX.js">
+    <link rel="modulepreload" crossorigin href="./assets/package-BTIV9-Dk.js">
+    <link rel="modulepreload" crossorigin href="./assets/sparkles-COaEc8Qn.js">
+    <link rel="modulepreload" crossorigin href="./assets/MarimoErrorOutput-t_4q7nKD.js">
+    <link rel="modulepreload" crossorigin href="./assets/ErrorBoundary-Bo313Z9X.js">
+    <link rel="modulepreload" crossorigin href="./assets/eye-off-DI0EQXw0.js">
+    <link rel="modulepreload" crossorigin href="./assets/refresh-cw-C9FftltI.js">
+    <link rel="modulepreload" crossorigin href="./assets/tree-actions-DONHntzY.js">
+    <link rel="modulepreload" crossorigin href="./assets/spinner-BbI9qk88.js">
+    <link rel="modulepreload" crossorigin href="./assets/html-to-image-B9XAiAY5.js">
+    <link rel="modulepreload" crossorigin href="./assets/focus-CeA7VBO7.js">
+    <link rel="modulepreload" crossorigin href="./assets/useAsyncData-DAQcLiyE.js">
+    <link rel="modulepreload" crossorigin href="./assets/LazyAnyLanguageCodeMirror-BSGwa0jm.js">
+    <link rel="modulepreload" crossorigin href="./assets/micromark-factory-space-BUQpMdx2.js">
+    <link rel="modulepreload" crossorigin href="./assets/chunk-5FQGJX7Z-OScactr4.js">
+    <link rel="modulepreload" crossorigin href="./assets/markdown-renderer-BxBgsCTf.js">
+    <link rel="modulepreload" crossorigin href="./assets/command-DRHbYHUP.js">
+    <link rel="modulepreload" crossorigin href="./assets/field-DlNY-dDH.js">
+    <link rel="modulepreload" crossorigin href="./assets/popover-DMNO6Poc.js">
+    <link rel="modulepreload" crossorigin href="./assets/errors-Bi-kjxOy.js">
+    <link rel="modulepreload" crossorigin href="./assets/download-BVqpOaYz.js">
+    <link rel="modulepreload" crossorigin href="./assets/table-CnW850Wt.js">
+    <link rel="modulepreload" crossorigin href="./assets/useIframeCapabilities-B0dNZiKK.js">
+    <link rel="modulepreload" crossorigin href="./assets/error-banner-DEWyImqa.js">
+    <link rel="modulepreload" crossorigin href="./assets/formats-ZGU43GQU.js">
+    <link rel="modulepreload" crossorigin href="./assets/en-US-BXNio91F.js">
+    <link rel="modulepreload" crossorigin href="./assets/isValid-DKyiOp4U.js">
+    <link rel="modulepreload" crossorigin href="./assets/dates-D8uxHHPL.js">
+    <link rel="modulepreload" crossorigin href="./assets/extends-CeSFM22p.js">
+    <link rel="modulepreload" crossorigin href="./assets/emotion-is-prop-valid.esm-CK2zY6a8.js">
+    <link rel="modulepreload" crossorigin href="./assets/useDateFormatter-CAlTJ8HV.js">
+    <link rel="modulepreload" crossorigin href="./assets/react-icons.esm-DCqqMD4w.js">
+    <link rel="modulepreload" crossorigin href="./assets/RSPContexts-VzcTZjG1.js">
+    <link rel="modulepreload" crossorigin href="./assets/table-DxdydCSG.js">
+    <link rel="modulepreload" crossorigin href="./assets/ellipsis-D0iYysLh.js">
+    <link rel="modulepreload" crossorigin href="./assets/external-link-BktyywYg.js">
+    <link rel="modulepreload" crossorigin href="./assets/message-circle-RkIzfQEi.js">
+    <link rel="modulepreload" crossorigin href="./assets/plus-ZXRHY1up.js">
+    <link rel="modulepreload" crossorigin href="./assets/trash-2-CqTUwVuU.js">
+    <link rel="modulepreload" crossorigin href="./assets/react-resizable-panels.browser.esm-Ce2ksurd.js">
+    <link rel="modulepreload" crossorigin href="./assets/JsonOutput-Cqq7S3wn.js">
+    <link rel="modulepreload" crossorigin href="./assets/chart-no-axes-column-DVEV2j1H.js">
+    <link rel="modulepreload" crossorigin href="./assets/square-function-Dx0pKHko.js">
+    <link rel="modulepreload" crossorigin href="./assets/spec-CDgWI0fT.js">
+    <link rel="modulepreload" crossorigin href="./assets/column-preview-47aOuXOh.js">
+    <link rel="modulepreload" crossorigin href="./assets/icons-avFV3lBF.js">
+    <link rel="modulepreload" crossorigin href="./assets/radio-group-xSHDhdM7.js">
+    <link rel="modulepreload" crossorigin href="./assets/floating-outline-Dy8nXch3.js">
+    <link rel="modulepreload" crossorigin href="./assets/objectWithoutPropertiesLoose-BkUn3I0-.js">
+    <link rel="modulepreload" crossorigin href="./assets/esm-X3Tr2pur.js">
+    <link rel="modulepreload" crossorigin href="./assets/readonly-python-code-C12Tt_qR.js">
+    <link rel="modulepreload" crossorigin href="./assets/file-headphone-CUN2DC78.js">
+    <link rel="modulepreload" crossorigin href="./assets/file-BvoBtS_V.js">
+    <link rel="modulepreload" crossorigin href="./assets/image-BzUcK6ho.js">
+    <link rel="modulepreload" crossorigin href="./assets/file-icons-BSYRCaKq.js">
+    <link rel="modulepreload" crossorigin href="./assets/switch-DqXjpgoL.js">
+    <link rel="modulepreload" crossorigin href="./assets/events-XR_LpvHc.js">
+    <link rel="modulepreload" crossorigin href="./assets/globals-B2VpoaLA.js">
+    <link rel="modulepreload" crossorigin href="./assets/share-DQjChRJG.js">
+    <link rel="modulepreload" crossorigin href="./assets/blob-BiK5xmlC.js">
+    <link rel="modulepreload" crossorigin href="./assets/memoize-Tp7rARFe.js">
+    <link rel="modulepreload" crossorigin href="./assets/get-C-qh_et5.js">
+    <link rel="modulepreload" crossorigin href="./assets/_baseSet-CsW0tABf.js">
+    <link rel="modulepreload" crossorigin href="./assets/state-Csq9SFHN.js">
+    <link rel="modulepreload" crossorigin href="./assets/label-CFvCMYuj.js">
+    <link rel="modulepreload" crossorigin href="./assets/textarea-D_WnJbC1.js">
+    <link rel="modulepreload" crossorigin href="./assets/refresh-ccw-Bee7JLOl.js">
+    <link rel="modulepreload" crossorigin href="./assets/form-x2vXRBGq.js">
+    <link rel="modulepreload" crossorigin href="./assets/renderShortcut-DTZeni4V.js">
+    <link rel="modulepreload" crossorigin href="./assets/useBoolean-DmobZaim.js">
+    <link rel="modulepreload" crossorigin href="./assets/useDeepCompareMemoize-CWcgQCbT.js">
+    <link rel="modulepreload" crossorigin href="./assets/types-BnrgJ4Gh.js">
+    <link rel="modulepreload" crossorigin href="./assets/semaphore-X3ApuO41.js">
+    <link rel="modulepreload" crossorigin href="./assets/fileToBase64-BSOFR3RV.js">
+    <link rel="modulepreload" crossorigin href="./assets/pathUtils-BXCjaLHB.js">
+    <link rel="modulepreload" crossorigin href="./assets/prop-types-B6Y2e__V.js">
+    <link rel="modulepreload" crossorigin href="./assets/es-EItoYvXh.js">
+    <link rel="modulepreload" crossorigin href="./assets/_hasPath-hMc_3QZy.js">
+    <link rel="modulepreload" crossorigin href="./assets/hasIn-CSsM95b1.js">
+    <link rel="modulepreload" crossorigin href="./assets/flatten-Bd5tsfm_.js">
+    <link rel="modulepreload" crossorigin href="./assets/pick-D1xb4gl6.js">
+    <link rel="modulepreload" crossorigin href="./assets/code-xml-tqeFGeKJ.js">
+    <link rel="modulepreload" crossorigin href="./assets/house-DHu4JLi3.js">
+    <link rel="modulepreload" crossorigin href="./assets/square-35tXIgiR.js">
+    <link rel="modulepreload" crossorigin href="./assets/triangle-alert-D8Ft17xk.js">
+    <link rel="modulepreload" crossorigin href="./assets/bundle.esm-D544r2Sr.js">
+    <link rel="stylesheet" crossorigin href="./assets/cells-BVzo2MHf.css">
+    <link rel="stylesheet" crossorigin href="./assets/markdown-renderer-DdDKmWlR.css">
+    <link rel="stylesheet" crossorigin href="./assets/JsonOutput-BQtz7-np.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-DZAttTAm.css">
+  <marimo-wasm hidden=""></marimo-wasm>
+    <script>
+        if (window.location.protocol === 'file:') {
+            alert('Warning: This file must be served by an HTTP server to function correctly.');
+        }
+    </script>
+    
+    <style>
+        #save-button {
+            display: none !important;
+        }
+        #filename-input {
+            display: none !important;
+        }
+    </style>
+    
+<script data-marimo="true">
+    Object.defineProperty(window, "__MARIMO_EXPORT_CONTEXT__", {
+        value: Object.freeze({
+            trusted: true,
+            notebookCode: "import marimo\n\n__generated_with = \"0.23.14\"\napp = marimo.App(width=\"medium\")\n\n\n@app.cell(hide_code=True)\ndef _():\n    import marimo as mo\n    import numpy as np\n    import matplotlib.pyplot as plt\n\n    return mo, plt\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.md(r\"\"\"\n    # Momentum \u0026 Impulse, Part 4: Conservation of momentum\n\n    *VCE Physics Unit 2, AOS1, Energy and motion*\n\n    *Linked to Edrolo Chapter 9B*\n\n    This is **Part 4 of 4**, the final part. It follows on from Part 3 (Impulse\n    in collisions). In this part you will learn:\n\n    - What an **isolated system** is\n    - Why total momentum is conserved in a collision\n    - How to use $m_1u_1 + m_2u_2 = m_1v_1 + m_2v_2$\n\n    *This part should take about 20 minutes.*\n\n    ------\n    \"\"\")\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.md(r\"\"\"\n    ## Total momentum is conserved\n\n    In an **isolated system** (one with no external net force), the **total**\n    momentum before a collision equals the total momentum after. We say momentum\n    is **conserved**:\n\n    $$m_1u_1 + m_2u_2 = m_1v_1 + m_2v_2$$\n\n    - $u$ = velocity **before** the collision (initial)\n    - $v$ = velocity **after** the collision (final)\n    - the subscripts $1$ and $2$ label the two objects\n\n    This works for **every** type of collision, whether the objects bounce apart\n    (elastic) or stick together (inelastic).\n\n    Remember velocity has direction, so watch the **signs**: take one direction\n    as positive and the opposite as negative.\n    \"\"\")\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.md(r\"\"\"\n    ## Worked example\n\n    **A 1000 kg car moving at 10 m/s rear-ends a stationary 1000 kg car, and the\n    two lock together. Find their common velocity afterwards.**\n\n    **Step 1** \u2014 Total momentum before.\n\n    $p_{before} = m_1u_1 + m_2u_2 = 1000 \\times 10 + 1000 \\times 0 = 10\\,000\n    \\text{ kg m s}^{-1}$\n\n    **Step 2** \u2014 Momentum is conserved, so the total after is the same.\n\n    $p_{after} = 10\\,000 \\text{ kg m s}^{-1}$\n\n    **Step 3** \u2014 The cars lock together, so they share one velocity $v$.\n\n    $10\\,000 = m_1 v + m_2 v = (1000 + 1000)\\,v = 2000\\,v$\n\n    **Step 4** \u2014 Solve.\n\n    $v = \\dfrac{10\\,000}{2000} = 5 \\text{ m/s}$\n    \"\"\")\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.md(r\"\"\"\n    ## A common mistake (non-example)\n\n    \u003E *\"Momentum is conserved, so each car keeps the same momentum it started\n    \u003E with.\"*\n\n    This is **wrong**. Conservation applies to the **total** momentum of the\n    system, not to each object on its own. Individual objects' momenta change all\n    the time during a collision. It is only the sum, $p_1 + p_2$ before $= p_1' +\n    p_2'$ after, that stays constant, and only because no external net force acts.\n    \"\"\")\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.md(r\"\"\"\n    ## Explore it: the collision simulator\n\n    Choose each object's mass and initial velocity (positive = right, negative =\n    left) and a collision type. The bar charts show the velocities and momenta\n    before and after.\n\n    **Predict first:** compare the two \"total momentum\" bars (before and after).\n    What do you expect to see?\n    \"\"\")\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    m1_slider = mo.ui.slider(start=1, stop=2000, step=10, value=1000, label=\"$m_1$ (kg)\")\n    u1_slider = mo.ui.slider(start=-20, stop=20, step=0.5, value=10, label=\"$u_1$ (m/s)\")\n    m2_slider = mo.ui.slider(start=1, stop=2000, step=10, value=1000, label=\"$m_2$ (kg)\")\n    u2_slider = mo.ui.slider(start=-20, stop=20, step=0.5, value=0, label=\"$u_2$ (m/s)\")\n    collision_type = mo.ui.radio(\n        options=[\"Perfectly inelastic (stick together)\", \"Elastic (bounce apart)\"],\n        value=\"Perfectly inelastic (stick together)\",\n        label=\"Collision type\",\n    )\n    mo.vstack(\n        [\n            mo.hstack([m1_slider, u1_slider], justify=\"start\", gap=2),\n            mo.hstack([m2_slider, u2_slider], justify=\"start\", gap=2),\n            collision_type,\n        ]\n    )\n    return collision_type, m1_slider, m2_slider, u1_slider, u2_slider\n\n\n@app.cell(hide_code=True)\ndef _(collision_type, m1_slider, m2_slider, mo, u1_slider, u2_slider):\n    _m1, _m2 = m1_slider.value, m2_slider.value\n    _u1, _u2 = u1_slider.value, u2_slider.value\n    _p_before = _m1 * _u1 + _m2 * _u2\n\n    if collision_type.value.startswith(\"Perfectly\"):\n        _v_common = _p_before / (_m1 + _m2)\n        _v1, _v2 = _v_common, _v_common\n    else:\n        _v1 = ((_m1 - _m2) / (_m1 + _m2)) * _u1 + (2 * _m2 / (_m1 + _m2)) * _u2\n        _v2 = (2 * _m1 / (_m1 + _m2)) * _u1 + ((_m2 - _m1) / (_m1 + _m2)) * _u2\n\n    _p_after = _m1 * _v1 + _m2 * _v2\n\n    mo.md(\n        f\"\"\"\n        **Before:** $p = m_1u_1 + m_2u_2 = ({_m1})({_u1}) + ({_m2})({_u2}) = {_p_before:,.1f}$ kg m/s\n\n        **After:** $v_1 = {_v1:,.2f}$ m/s, $v_2 = {_v2:,.2f}$ m/s\n        \u0026nbsp;\u0026nbsp;\u2192\u0026nbsp;\u0026nbsp; $p = {_p_after:,.1f}$ kg m/s\n\n        Momentum is conserved.\n        \"\"\"\n    )\n    return\n\n\n@app.cell(hide_code=True)\ndef _(collision_type, m1_slider, m2_slider, plt, u1_slider, u2_slider):\n    _m1, _m2 = m1_slider.value, m2_slider.value\n    _u1, _u2 = u1_slider.value, u2_slider.value\n    _p_before = _m1 * _u1 + _m2 * _u2\n\n    if collision_type.value.startswith(\"Perfectly\"):\n        _v_common = _p_before / (_m1 + _m2)\n        _v1, _v2 = _v_common, _v_common\n    else:\n        _v1 = ((_m1 - _m2) / (_m1 + _m2)) * _u1 + (2 * _m2 / (_m1 + _m2)) * _u2\n        _v2 = (2 * _m1 / (_m1 + _m2)) * _u1 + ((_m2 - _m1) / (_m1 + _m2)) * _u2\n\n    _p1_before = _m1 * _u1\n    _p2_before = _m2 * _u2\n    _pt_before = _p1_before + _p2_before\n    _p1_after = _m1 * _v1\n    _p2_after = _m2 * _v2\n    _pt_after = _p1_after + _p2_after\n\n    fig4, ([ax4a, ax4b], [ax4c, ax4d]) = plt.subplots(2, 2, figsize=(8, 6))\n\n    _labels = ['object 1', 'object 2']\n    _labels1 = ['object 1', 'object 2', 'total']\n\n    ax4a.bar(_labels, [_u1, _u2], color=[\"tab:blue\", \"tab:red\"])\n    ax4a.axhline(0, color=\"black\", linewidth=0.8)\n    ax4a.set_title(\"Velocities Before\")\n    ax4a.set_ylabel(\"Velocity (m/s)\")\n    ax4a.grid(which=\"major\", alpha=0.6, axis=\"y\")\n    ax4a.grid(which=\"minor\", alpha=0.6, axis=\"y\")\n    ax4a.minorticks_on()\n\n    ax4b.bar(_labels, [_v1, _v2], color=[\"tab:blue\", \"tab:red\"])\n    ax4b.axhline(0, color=\"black\", linewidth=0.8)\n    ax4b.set_title(\"Velocities After\")\n    ax4b.set_ylabel(\"Velocity (m/s)\")\n    ax4b.grid(which=\"major\", alpha=0.6, axis=\"y\")\n    ax4b.grid(which=\"minor\", alpha=0.6, axis=\"y\")\n    ax4b.minorticks_on()\n\n    ax4c.bar(_labels1, [_p1_before, _p2_before, _pt_before], color=[\"tab:blue\", \"tab:red\", \"tab:orange\"])\n    ax4c.axhline(0, color=\"black\", linewidth=0.8)\n    ax4c.set_title(\"Momentum Before\")\n    ax4c.set_ylabel(\"Momentum (kg\u00b7m/s)\")\n    ax4c.grid(which=\"major\", alpha=0.6, axis=\"y\")\n    ax4c.grid(which=\"minor\", alpha=0.6, axis=\"y\")\n    ax4c.minorticks_on()\n\n    ax4d.bar(_labels1, [_p1_after, _p2_after, _pt_after], color=[\"tab:blue\", \"tab:red\", \"tab:orange\"])\n    ax4d.axhline(0, color=\"black\", linewidth=0.8)\n    ax4d.set_title(\"Momentum After\")\n    ax4d.set_ylabel(\"Momentum (kg\u00b7m/s)\")\n    ax4d.grid(which=\"major\", alpha=0.6, axis=\"y\")\n    ax4d.grid(which=\"minor\", alpha=0.6, axis=\"y\")\n    ax4d.minorticks_on()\n\n    _ylim_v = 22\n    ax4a.set_ylim(-_ylim_v, _ylim_v)\n    ax4b.set_ylim(-_ylim_v, _ylim_v)\n\n    _ylim_p = 42000\n    ax4c.set_ylim(-_ylim_p, _ylim_p)\n    ax4d.set_ylim(-_ylim_p, _ylim_p)\n\n    fig4.tight_layout()\n    fig4\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.md(r\"\"\"\n    ## Checkpoint\n\n    **1. Looking at the \"total momentum\" bars, what stays the same before and\n    after the collision? What changes?**\n    \"\"\")\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    check1_explain = mo.ui.text_area(\n        placeholder=\"Type your answer here...\", label=\"Your answer:\", full_width=True\n    )\n    check1_explain\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.accordion(\n        {\n            \"Reveal answer\": mo.md(\n                \"\"\"\n                The **total** momentum bar is the same height before and after,\n                momentum is conserved. The **individual** objects' momenta (and\n                their velocities) change, but their sum does not.\n                \"\"\"\n            )\n        }\n    )\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.md(r\"\"\"\n    **2. A 900 kg car travelling at 8 m/s hits a stationary 1500 kg truck and\n    they lock together. Use the simulator (set $m_1 = 900$, $u_1 = 8$, $m_2 =\n    1500$, $u_2 = 0$, perfectly inelastic) to find the momentum before, then\n    calculate their common velocity afterwards.**\n    \"\"\")\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    q1_answer = mo.ui.number(start=-20, stop=20, step=0.01, label=\"Your answer (m/s):\")\n    q1_answer\n    return (q1_answer,)\n\n\n@app.cell(hide_code=True)\ndef _(mo, q1_answer):\n    _correct = (900 * 8 + 1500 * 0) / (900 + 1500)\n    if q1_answer.value is None:\n        _fb = mo.md(\"*Enter a value above.*\")\n    elif abs(q1_answer.value - _correct) \u003C 0.05:\n        _fb = mo.md(\"**Correct.**\")\n    else:\n        _fb = mo.md(\"Try again, momentum before is $900 \\\\times 8 = 7200$, then divide by the total mass.\")\n    _fb\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.accordion(\n        {\n            \"Solution\": mo.md(\n                \"\"\"\n                $p_{before} = 900 \\\\times 8 + 1500 \\\\times 0 = 7200\n                \\\\text{ kg m s}^{-1}$\n\n                They lock together, so they share one velocity:\n\n                $7200 = (900 + 1500)\\\\,v = 2400\\\\,v$\n\n                $v = \\\\dfrac{7200}{2400} = 3 \\\\text{ m/s}$\n                \"\"\"\n            )\n        }\n    )\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.md(r\"\"\"\n    ## Quick practice\n\n    **Q1. A 750 kg car travelling at 15.0 m/s rear-ends a stationary 900 kg car\n    and the two lock together. Calculate their common velocity just after the\n    collision.**\n    \"\"\")\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    q2_answer = mo.ui.number(start=0, stop=30, step=0.01, label=\"Your answer (m/s):\")\n    q2_answer\n    return (q2_answer,)\n\n\n@app.cell(hide_code=True)\ndef _(mo, q2_answer):\n    _correct = 750 * 15.0 / (750 + 900)\n    if q2_answer.value is None:\n        _fb = mo.md(\"*Enter a value above.*\")\n    elif abs(q2_answer.value - _correct) \u003C 0.05:\n        _fb = mo.md(\"**Correct.**\")\n    else:\n        _fb = mo.md(\"Try again, momentum before is $750 \\\\times 15$, then divide by the total mass.\")\n    _fb\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.accordion(\n        {\n            \"Solution\": mo.md(\n                \"\"\"\n                $p_{before} = 750 \\\\times 15.0 = 11\\\\,250 \\\\text{ kg m s}^{-1}$\n\n                $11\\\\,250 = (750 + 900)\\\\,v = 1650\\\\,v$\n\n                $v = \\\\dfrac{11\\\\,250}{1650} = 6.82 \\\\text{ m/s}$\n                \"\"\"\n            )\n        }\n    )\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.md(r\"\"\"\n    **Q2. Two ice skaters stand at rest, facing each other, then push off. Skater\n    A (50.0 kg) moves right at 3.00 m/s. Calculate the speed of skater B (70.0\n    kg), and explain why B must move the opposite way.**\n\n    *Hint: the total momentum before they push off is zero.*\n    \"\"\")\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    q3_answer = mo.ui.number(start=0, stop=10, step=0.01, label=\"Skater B's speed (m/s):\")\n    q3_explain = mo.ui.text_area(\n        placeholder=\"Explain why B moves the opposite way...\", label=\"Explanation:\", full_width=True\n    )\n    mo.vstack([q3_answer, q3_explain])\n    return (q3_answer,)\n\n\n@app.cell(hide_code=True)\ndef _(mo, q3_answer):\n    _correct = 50.0 * 3.00 / 70.0\n    if q3_answer.value is None:\n        _fb = mo.md(\"*Enter a value above.*\")\n    elif abs(q3_answer.value - _correct) \u003C 0.05:\n        _fb = mo.md(\"**Correct.**\")\n    else:\n        _fb = mo.md(\"Try again, total momentum stays zero, so $50 \\\\times 3 = 70 \\\\times v_B$.\")\n    _fb\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.accordion(\n        {\n            \"Compare your answer\": mo.md(\n                \"\"\"\n                Before pushing off the total momentum is zero. It must stay zero,\n                so the two momenta must cancel:\n\n                $50.0 \\\\times 3.00 = 70.0 \\\\times v_B$\n\n                $v_B = \\\\dfrac{150}{70.0} = 2.14 \\\\text{ m/s}$\n\n                B must move in the **opposite** direction so that its (negative)\n                momentum cancels A's (positive) momentum, keeping the total at\n                zero.\n                \"\"\"\n            )\n        }\n    )\n    return\n\n\n@app.cell(hide_code=True)\ndef _(mo):\n    mo.md(r\"\"\"\n    ------\n\n    **Well done, that completes the four-part Momentum \u0026 Impulse series.** You\n    can now calculate momentum, use impulse to find forces and changes in\n    momentum, and apply conservation of momentum to collisions.\n\n    ------\n\n    Licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)\n    \u2014 free to use, adapt, and share for non-commercial purposes, with attribution.\n    Developed with the assistance of Claude (Anthropic), referenced against the\n    [VCE Physics Study Design](https://www.vcaa.vic.edu.au/curriculum/vce/vce-study-designs/physics) (VCAA).\n    \"\"\")\n    return\n\n\nif __name__ == \"__main__\":\n    app.run()\n",
+        }),
+        writable: false,
+        configurable: false,
+    });
+</script>
+<marimo-code hidden="">import%20marimo%0A%0A__generated_with%20%3D%20%220.23.14%22%0Aapp%20%3D%20marimo.App(width%3D%22medium%22)%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_()%3A%0A%20%20%20%20import%20marimo%20as%20mo%0A%20%20%20%20import%20numpy%20as%20np%0A%20%20%20%20import%20matplotlib.pyplot%20as%20plt%0A%0A%20%20%20%20return%20mo%2C%20plt%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%0A%20%20%20%20%23%20Momentum%20%26%20Impulse%2C%20Part%204%3A%20Conservation%20of%20momentum%0A%0A%20%20%20%20*VCE%20Physics%20Unit%202%2C%20AOS1%2C%20Energy%20and%20motion*%0A%0A%20%20%20%20*Linked%20to%20Edrolo%20Chapter%209B*%0A%0A%20%20%20%20This%20is%20**Part%204%20of%204**%2C%20the%20final%20part.%20It%20follows%20on%20from%20Part%203%20(Impulse%0A%20%20%20%20in%20collisions).%20In%20this%20part%20you%20will%20learn%3A%0A%0A%20%20%20%20-%20What%20an%20**isolated%20system**%20is%0A%20%20%20%20-%20Why%20total%20momentum%20is%20conserved%20in%20a%20collision%0A%20%20%20%20-%20How%20to%20use%20%24m_1u_1%20%2B%20m_2u_2%20%3D%20m_1v_1%20%2B%20m_2v_2%24%0A%0A%20%20%20%20*This%20part%20should%20take%20about%2020%20minutes.*%0A%0A%20%20%20%20------%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%0A%20%20%20%20%23%23%20Total%20momentum%20is%20conserved%0A%0A%20%20%20%20In%20an%20**isolated%20system**%20(one%20with%20no%20external%20net%20force)%2C%20the%20**total**%0A%20%20%20%20momentum%20before%20a%20collision%20equals%20the%20total%20momentum%20after.%20We%20say%20momentum%0A%20%20%20%20is%20**conserved**%3A%0A%0A%20%20%20%20%24%24m_1u_1%20%2B%20m_2u_2%20%3D%20m_1v_1%20%2B%20m_2v_2%24%24%0A%0A%20%20%20%20-%20%24u%24%20%3D%20velocity%20**before**%20the%20collision%20(initial)%0A%20%20%20%20-%20%24v%24%20%3D%20velocity%20**after**%20the%20collision%20(final)%0A%20%20%20%20-%20the%20subscripts%20%241%24%20and%20%242%24%20label%20the%20two%20objects%0A%0A%20%20%20%20This%20works%20for%20**every**%20type%20of%20collision%2C%20whether%20the%20objects%20bounce%20apart%0A%20%20%20%20(elastic)%20or%20stick%20together%20(inelastic).%0A%0A%20%20%20%20Remember%20velocity%20has%20direction%2C%20so%20watch%20the%20**signs**%3A%20take%20one%20direction%0A%20%20%20%20as%20positive%20and%20the%20opposite%20as%20negative.%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%0A%20%20%20%20%23%23%20Worked%20example%0A%0A%20%20%20%20**A%201000%20kg%20car%20moving%20at%2010%20m%2Fs%20rear-ends%20a%20stationary%201000%20kg%20car%2C%20and%20the%0A%20%20%20%20two%20lock%20together.%20Find%20their%20common%20velocity%20afterwards.**%0A%0A%20%20%20%20**Step%201**%20%E2%80%94%20Total%20momentum%20before.%0A%0A%20%20%20%20%24p_%7Bbefore%7D%20%3D%20m_1u_1%20%2B%20m_2u_2%20%3D%201000%20%5Ctimes%2010%20%2B%201000%20%5Ctimes%200%20%3D%2010%5C%2C000%0A%20%20%20%20%5Ctext%7B%20kg%20m%20s%7D%5E%7B-1%7D%24%0A%0A%20%20%20%20**Step%202**%20%E2%80%94%20Momentum%20is%20conserved%2C%20so%20the%20total%20after%20is%20the%20same.%0A%0A%20%20%20%20%24p_%7Bafter%7D%20%3D%2010%5C%2C000%20%5Ctext%7B%20kg%20m%20s%7D%5E%7B-1%7D%24%0A%0A%20%20%20%20**Step%203**%20%E2%80%94%20The%20cars%20lock%20together%2C%20so%20they%20share%20one%20velocity%20%24v%24.%0A%0A%20%20%20%20%2410%5C%2C000%20%3D%20m_1%20v%20%2B%20m_2%20v%20%3D%20(1000%20%2B%201000)%5C%2Cv%20%3D%202000%5C%2Cv%24%0A%0A%20%20%20%20**Step%204**%20%E2%80%94%20Solve.%0A%0A%20%20%20%20%24v%20%3D%20%5Cdfrac%7B10%5C%2C000%7D%7B2000%7D%20%3D%205%20%5Ctext%7B%20m%2Fs%7D%24%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%0A%20%20%20%20%23%23%20A%20common%20mistake%20(non-example)%0A%0A%20%20%20%20%3E%20*%22Momentum%20is%20conserved%2C%20so%20each%20car%20keeps%20the%20same%20momentum%20it%20started%0A%20%20%20%20%3E%20with.%22*%0A%0A%20%20%20%20This%20is%20**wrong**.%20Conservation%20applies%20to%20the%20**total**%20momentum%20of%20the%0A%20%20%20%20system%2C%20not%20to%20each%20object%20on%20its%20own.%20Individual%20objects'%20momenta%20change%20all%0A%20%20%20%20the%20time%20during%20a%20collision.%20It%20is%20only%20the%20sum%2C%20%24p_1%20%2B%20p_2%24%20before%20%24%3D%20p_1'%20%2B%0A%20%20%20%20p_2'%24%20after%2C%20that%20stays%20constant%2C%20and%20only%20because%20no%20external%20net%20force%20acts.%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%0A%20%20%20%20%23%23%20Explore%20it%3A%20the%20collision%20simulator%0A%0A%20%20%20%20Choose%20each%20object's%20mass%20and%20initial%20velocity%20(positive%20%3D%20right%2C%20negative%20%3D%0A%20%20%20%20left)%20and%20a%20collision%20type.%20The%20bar%20charts%20show%20the%20velocities%20and%20momenta%0A%20%20%20%20before%20and%20after.%0A%0A%20%20%20%20**Predict%20first%3A**%20compare%20the%20two%20%22total%20momentum%22%20bars%20(before%20and%20after).%0A%20%20%20%20What%20do%20you%20expect%20to%20see%3F%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20m1_slider%20%3D%20mo.ui.slider(start%3D1%2C%20stop%3D2000%2C%20step%3D10%2C%20value%3D1000%2C%20label%3D%22%24m_1%24%20(kg)%22)%0A%20%20%20%20u1_slider%20%3D%20mo.ui.slider(start%3D-20%2C%20stop%3D20%2C%20step%3D0.5%2C%20value%3D10%2C%20label%3D%22%24u_1%24%20(m%2Fs)%22)%0A%20%20%20%20m2_slider%20%3D%20mo.ui.slider(start%3D1%2C%20stop%3D2000%2C%20step%3D10%2C%20value%3D1000%2C%20label%3D%22%24m_2%24%20(kg)%22)%0A%20%20%20%20u2_slider%20%3D%20mo.ui.slider(start%3D-20%2C%20stop%3D20%2C%20step%3D0.5%2C%20value%3D0%2C%20label%3D%22%24u_2%24%20(m%2Fs)%22)%0A%20%20%20%20collision_type%20%3D%20mo.ui.radio(%0A%20%20%20%20%20%20%20%20options%3D%5B%22Perfectly%20inelastic%20(stick%20together)%22%2C%20%22Elastic%20(bounce%20apart)%22%5D%2C%0A%20%20%20%20%20%20%20%20value%3D%22Perfectly%20inelastic%20(stick%20together)%22%2C%0A%20%20%20%20%20%20%20%20label%3D%22Collision%20type%22%2C%0A%20%20%20%20)%0A%20%20%20%20mo.vstack(%0A%20%20%20%20%20%20%20%20%5B%0A%20%20%20%20%20%20%20%20%20%20%20%20mo.hstack(%5Bm1_slider%2C%20u1_slider%5D%2C%20justify%3D%22start%22%2C%20gap%3D2)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20mo.hstack(%5Bm2_slider%2C%20u2_slider%5D%2C%20justify%3D%22start%22%2C%20gap%3D2)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20collision_type%2C%0A%20%20%20%20%20%20%20%20%5D%0A%20%20%20%20)%0A%20%20%20%20return%20collision_type%2C%20m1_slider%2C%20m2_slider%2C%20u1_slider%2C%20u2_slider%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(collision_type%2C%20m1_slider%2C%20m2_slider%2C%20mo%2C%20u1_slider%2C%20u2_slider)%3A%0A%20%20%20%20_m1%2C%20_m2%20%3D%20m1_slider.value%2C%20m2_slider.value%0A%20%20%20%20_u1%2C%20_u2%20%3D%20u1_slider.value%2C%20u2_slider.value%0A%20%20%20%20_p_before%20%3D%20_m1%20*%20_u1%20%2B%20_m2%20*%20_u2%0A%0A%20%20%20%20if%20collision_type.value.startswith(%22Perfectly%22)%3A%0A%20%20%20%20%20%20%20%20_v_common%20%3D%20_p_before%20%2F%20(_m1%20%2B%20_m2)%0A%20%20%20%20%20%20%20%20_v1%2C%20_v2%20%3D%20_v_common%2C%20_v_common%0A%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20_v1%20%3D%20((_m1%20-%20_m2)%20%2F%20(_m1%20%2B%20_m2))%20*%20_u1%20%2B%20(2%20*%20_m2%20%2F%20(_m1%20%2B%20_m2))%20*%20_u2%0A%20%20%20%20%20%20%20%20_v2%20%3D%20(2%20*%20_m1%20%2F%20(_m1%20%2B%20_m2))%20*%20_u1%20%2B%20((_m2%20-%20_m1)%20%2F%20(_m1%20%2B%20_m2))%20*%20_u2%0A%0A%20%20%20%20_p_after%20%3D%20_m1%20*%20_v1%20%2B%20_m2%20*%20_v2%0A%0A%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20f%22%22%22%0A%20%20%20%20%20%20%20%20**Before%3A**%20%24p%20%3D%20m_1u_1%20%2B%20m_2u_2%20%3D%20(%7B_m1%7D)(%7B_u1%7D)%20%2B%20(%7B_m2%7D)(%7B_u2%7D)%20%3D%20%7B_p_before%3A%2C.1f%7D%24%20kg%20m%2Fs%0A%0A%20%20%20%20%20%20%20%20**After%3A**%20%24v_1%20%3D%20%7B_v1%3A%2C.2f%7D%24%20m%2Fs%2C%20%24v_2%20%3D%20%7B_v2%3A%2C.2f%7D%24%20m%2Fs%0A%20%20%20%20%20%20%20%20%26nbsp%3B%26nbsp%3B%E2%86%92%26nbsp%3B%26nbsp%3B%20%24p%20%3D%20%7B_p_after%3A%2C.1f%7D%24%20kg%20m%2Fs%0A%0A%20%20%20%20%20%20%20%20Momentum%20is%20conserved.%0A%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(collision_type%2C%20m1_slider%2C%20m2_slider%2C%20plt%2C%20u1_slider%2C%20u2_slider)%3A%0A%20%20%20%20_m1%2C%20_m2%20%3D%20m1_slider.value%2C%20m2_slider.value%0A%20%20%20%20_u1%2C%20_u2%20%3D%20u1_slider.value%2C%20u2_slider.value%0A%20%20%20%20_p_before%20%3D%20_m1%20*%20_u1%20%2B%20_m2%20*%20_u2%0A%0A%20%20%20%20if%20collision_type.value.startswith(%22Perfectly%22)%3A%0A%20%20%20%20%20%20%20%20_v_common%20%3D%20_p_before%20%2F%20(_m1%20%2B%20_m2)%0A%20%20%20%20%20%20%20%20_v1%2C%20_v2%20%3D%20_v_common%2C%20_v_common%0A%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20_v1%20%3D%20((_m1%20-%20_m2)%20%2F%20(_m1%20%2B%20_m2))%20*%20_u1%20%2B%20(2%20*%20_m2%20%2F%20(_m1%20%2B%20_m2))%20*%20_u2%0A%20%20%20%20%20%20%20%20_v2%20%3D%20(2%20*%20_m1%20%2F%20(_m1%20%2B%20_m2))%20*%20_u1%20%2B%20((_m2%20-%20_m1)%20%2F%20(_m1%20%2B%20_m2))%20*%20_u2%0A%0A%20%20%20%20_p1_before%20%3D%20_m1%20*%20_u1%0A%20%20%20%20_p2_before%20%3D%20_m2%20*%20_u2%0A%20%20%20%20_pt_before%20%3D%20_p1_before%20%2B%20_p2_before%0A%20%20%20%20_p1_after%20%3D%20_m1%20*%20_v1%0A%20%20%20%20_p2_after%20%3D%20_m2%20*%20_v2%0A%20%20%20%20_pt_after%20%3D%20_p1_after%20%2B%20_p2_after%0A%0A%20%20%20%20fig4%2C%20(%5Bax4a%2C%20ax4b%5D%2C%20%5Bax4c%2C%20ax4d%5D)%20%3D%20plt.subplots(2%2C%202%2C%20figsize%3D(8%2C%206))%0A%0A%20%20%20%20_labels%20%3D%20%5B'object%201'%2C%20'object%202'%5D%0A%20%20%20%20_labels1%20%3D%20%5B'object%201'%2C%20'object%202'%2C%20'total'%5D%0A%0A%20%20%20%20ax4a.bar(_labels%2C%20%5B_u1%2C%20_u2%5D%2C%20color%3D%5B%22tab%3Ablue%22%2C%20%22tab%3Ared%22%5D)%0A%20%20%20%20ax4a.axhline(0%2C%20color%3D%22black%22%2C%20linewidth%3D0.8)%0A%20%20%20%20ax4a.set_title(%22Velocities%20Before%22)%0A%20%20%20%20ax4a.set_ylabel(%22Velocity%20(m%2Fs)%22)%0A%20%20%20%20ax4a.grid(which%3D%22major%22%2C%20alpha%3D0.6%2C%20axis%3D%22y%22)%0A%20%20%20%20ax4a.grid(which%3D%22minor%22%2C%20alpha%3D0.6%2C%20axis%3D%22y%22)%0A%20%20%20%20ax4a.minorticks_on()%0A%0A%20%20%20%20ax4b.bar(_labels%2C%20%5B_v1%2C%20_v2%5D%2C%20color%3D%5B%22tab%3Ablue%22%2C%20%22tab%3Ared%22%5D)%0A%20%20%20%20ax4b.axhline(0%2C%20color%3D%22black%22%2C%20linewidth%3D0.8)%0A%20%20%20%20ax4b.set_title(%22Velocities%20After%22)%0A%20%20%20%20ax4b.set_ylabel(%22Velocity%20(m%2Fs)%22)%0A%20%20%20%20ax4b.grid(which%3D%22major%22%2C%20alpha%3D0.6%2C%20axis%3D%22y%22)%0A%20%20%20%20ax4b.grid(which%3D%22minor%22%2C%20alpha%3D0.6%2C%20axis%3D%22y%22)%0A%20%20%20%20ax4b.minorticks_on()%0A%0A%20%20%20%20ax4c.bar(_labels1%2C%20%5B_p1_before%2C%20_p2_before%2C%20_pt_before%5D%2C%20color%3D%5B%22tab%3Ablue%22%2C%20%22tab%3Ared%22%2C%20%22tab%3Aorange%22%5D)%0A%20%20%20%20ax4c.axhline(0%2C%20color%3D%22black%22%2C%20linewidth%3D0.8)%0A%20%20%20%20ax4c.set_title(%22Momentum%20Before%22)%0A%20%20%20%20ax4c.set_ylabel(%22Momentum%20(kg%C2%B7m%2Fs)%22)%0A%20%20%20%20ax4c.grid(which%3D%22major%22%2C%20alpha%3D0.6%2C%20axis%3D%22y%22)%0A%20%20%20%20ax4c.grid(which%3D%22minor%22%2C%20alpha%3D0.6%2C%20axis%3D%22y%22)%0A%20%20%20%20ax4c.minorticks_on()%0A%0A%20%20%20%20ax4d.bar(_labels1%2C%20%5B_p1_after%2C%20_p2_after%2C%20_pt_after%5D%2C%20color%3D%5B%22tab%3Ablue%22%2C%20%22tab%3Ared%22%2C%20%22tab%3Aorange%22%5D)%0A%20%20%20%20ax4d.axhline(0%2C%20color%3D%22black%22%2C%20linewidth%3D0.8)%0A%20%20%20%20ax4d.set_title(%22Momentum%20After%22)%0A%20%20%20%20ax4d.set_ylabel(%22Momentum%20(kg%C2%B7m%2Fs)%22)%0A%20%20%20%20ax4d.grid(which%3D%22major%22%2C%20alpha%3D0.6%2C%20axis%3D%22y%22)%0A%20%20%20%20ax4d.grid(which%3D%22minor%22%2C%20alpha%3D0.6%2C%20axis%3D%22y%22)%0A%20%20%20%20ax4d.minorticks_on()%0A%0A%20%20%20%20_ylim_v%20%3D%2022%0A%20%20%20%20ax4a.set_ylim(-_ylim_v%2C%20_ylim_v)%0A%20%20%20%20ax4b.set_ylim(-_ylim_v%2C%20_ylim_v)%0A%0A%20%20%20%20_ylim_p%20%3D%2042000%0A%20%20%20%20ax4c.set_ylim(-_ylim_p%2C%20_ylim_p)%0A%20%20%20%20ax4d.set_ylim(-_ylim_p%2C%20_ylim_p)%0A%0A%20%20%20%20fig4.tight_layout()%0A%20%20%20%20fig4%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%0A%20%20%20%20%23%23%20Checkpoint%0A%0A%20%20%20%20**1.%20Looking%20at%20the%20%22total%20momentum%22%20bars%2C%20what%20stays%20the%20same%20before%20and%0A%20%20%20%20after%20the%20collision%3F%20What%20changes%3F**%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20check1_explain%20%3D%20mo.ui.text_area(%0A%20%20%20%20%20%20%20%20placeholder%3D%22Type%20your%20answer%20here...%22%2C%20label%3D%22Your%20answer%3A%22%2C%20full_width%3DTrue%0A%20%20%20%20)%0A%20%20%20%20check1_explain%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.accordion(%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%22Reveal%20answer%22%3A%20mo.md(%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20The%20**total**%20momentum%20bar%20is%20the%20same%20height%20before%20and%20after%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20momentum%20is%20conserved.%20The%20**individual**%20objects'%20momenta%20(and%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20their%20velocities)%20change%2C%20but%20their%20sum%20does%20not.%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20%20%20%20%20%20%20%20%20)%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%0A%20%20%20%20**2.%20A%20900%20kg%20car%20travelling%20at%208%20m%2Fs%20hits%20a%20stationary%201500%20kg%20truck%20and%0A%20%20%20%20they%20lock%20together.%20Use%20the%20simulator%20(set%20%24m_1%20%3D%20900%24%2C%20%24u_1%20%3D%208%24%2C%20%24m_2%20%3D%0A%20%20%20%201500%24%2C%20%24u_2%20%3D%200%24%2C%20perfectly%20inelastic)%20to%20find%20the%20momentum%20before%2C%20then%0A%20%20%20%20calculate%20their%20common%20velocity%20afterwards.**%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20q1_answer%20%3D%20mo.ui.number(start%3D-20%2C%20stop%3D20%2C%20step%3D0.01%2C%20label%3D%22Your%20answer%20(m%2Fs)%3A%22)%0A%20%20%20%20q1_answer%0A%20%20%20%20return%20(q1_answer%2C)%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo%2C%20q1_answer)%3A%0A%20%20%20%20_correct%20%3D%20(900%20*%208%20%2B%201500%20*%200)%20%2F%20(900%20%2B%201500)%0A%20%20%20%20if%20q1_answer.value%20is%20None%3A%0A%20%20%20%20%20%20%20%20_fb%20%3D%20mo.md(%22*Enter%20a%20value%20above.*%22)%0A%20%20%20%20elif%20abs(q1_answer.value%20-%20_correct)%20%3C%200.05%3A%0A%20%20%20%20%20%20%20%20_fb%20%3D%20mo.md(%22**Correct.**%22)%0A%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20_fb%20%3D%20mo.md(%22Try%20again%2C%20momentum%20before%20is%20%24900%20%5C%5Ctimes%208%20%3D%207200%24%2C%20then%20divide%20by%20the%20total%20mass.%22)%0A%20%20%20%20_fb%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.accordion(%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%22Solution%22%3A%20mo.md(%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%24p_%7Bbefore%7D%20%3D%20900%20%5C%5Ctimes%208%20%2B%201500%20%5C%5Ctimes%200%20%3D%207200%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%5C%5Ctext%7B%20kg%20m%20s%7D%5E%7B-1%7D%24%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20They%20lock%20together%2C%20so%20they%20share%20one%20velocity%3A%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%247200%20%3D%20(900%20%2B%201500)%5C%5C%2Cv%20%3D%202400%5C%5C%2Cv%24%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%24v%20%3D%20%5C%5Cdfrac%7B7200%7D%7B2400%7D%20%3D%203%20%5C%5Ctext%7B%20m%2Fs%7D%24%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20%20%20%20%20%20%20%20%20)%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%0A%20%20%20%20%23%23%20Quick%20practice%0A%0A%20%20%20%20**Q1.%20A%20750%20kg%20car%20travelling%20at%2015.0%20m%2Fs%20rear-ends%20a%20stationary%20900%20kg%20car%0A%20%20%20%20and%20the%20two%20lock%20together.%20Calculate%20their%20common%20velocity%20just%20after%20the%0A%20%20%20%20collision.**%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20q2_answer%20%3D%20mo.ui.number(start%3D0%2C%20stop%3D30%2C%20step%3D0.01%2C%20label%3D%22Your%20answer%20(m%2Fs)%3A%22)%0A%20%20%20%20q2_answer%0A%20%20%20%20return%20(q2_answer%2C)%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo%2C%20q2_answer)%3A%0A%20%20%20%20_correct%20%3D%20750%20*%2015.0%20%2F%20(750%20%2B%20900)%0A%20%20%20%20if%20q2_answer.value%20is%20None%3A%0A%20%20%20%20%20%20%20%20_fb%20%3D%20mo.md(%22*Enter%20a%20value%20above.*%22)%0A%20%20%20%20elif%20abs(q2_answer.value%20-%20_correct)%20%3C%200.05%3A%0A%20%20%20%20%20%20%20%20_fb%20%3D%20mo.md(%22**Correct.**%22)%0A%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20_fb%20%3D%20mo.md(%22Try%20again%2C%20momentum%20before%20is%20%24750%20%5C%5Ctimes%2015%24%2C%20then%20divide%20by%20the%20total%20mass.%22)%0A%20%20%20%20_fb%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.accordion(%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%22Solution%22%3A%20mo.md(%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%24p_%7Bbefore%7D%20%3D%20750%20%5C%5Ctimes%2015.0%20%3D%2011%5C%5C%2C250%20%5C%5Ctext%7B%20kg%20m%20s%7D%5E%7B-1%7D%24%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2411%5C%5C%2C250%20%3D%20(750%20%2B%20900)%5C%5C%2Cv%20%3D%201650%5C%5C%2Cv%24%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%24v%20%3D%20%5C%5Cdfrac%7B11%5C%5C%2C250%7D%7B1650%7D%20%3D%206.82%20%5C%5Ctext%7B%20m%2Fs%7D%24%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20%20%20%20%20%20%20%20%20)%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%0A%20%20%20%20**Q2.%20Two%20ice%20skaters%20stand%20at%20rest%2C%20facing%20each%20other%2C%20then%20push%20off.%20Skater%0A%20%20%20%20A%20(50.0%20kg)%20moves%20right%20at%203.00%20m%2Fs.%20Calculate%20the%20speed%20of%20skater%20B%20(70.0%0A%20%20%20%20kg)%2C%20and%20explain%20why%20B%20must%20move%20the%20opposite%20way.**%0A%0A%20%20%20%20*Hint%3A%20the%20total%20momentum%20before%20they%20push%20off%20is%20zero.*%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20q3_answer%20%3D%20mo.ui.number(start%3D0%2C%20stop%3D10%2C%20step%3D0.01%2C%20label%3D%22Skater%20B's%20speed%20(m%2Fs)%3A%22)%0A%20%20%20%20q3_explain%20%3D%20mo.ui.text_area(%0A%20%20%20%20%20%20%20%20placeholder%3D%22Explain%20why%20B%20moves%20the%20opposite%20way...%22%2C%20label%3D%22Explanation%3A%22%2C%20full_width%3DTrue%0A%20%20%20%20)%0A%20%20%20%20mo.vstack(%5Bq3_answer%2C%20q3_explain%5D)%0A%20%20%20%20return%20(q3_answer%2C)%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo%2C%20q3_answer)%3A%0A%20%20%20%20_correct%20%3D%2050.0%20*%203.00%20%2F%2070.0%0A%20%20%20%20if%20q3_answer.value%20is%20None%3A%0A%20%20%20%20%20%20%20%20_fb%20%3D%20mo.md(%22*Enter%20a%20value%20above.*%22)%0A%20%20%20%20elif%20abs(q3_answer.value%20-%20_correct)%20%3C%200.05%3A%0A%20%20%20%20%20%20%20%20_fb%20%3D%20mo.md(%22**Correct.**%22)%0A%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20_fb%20%3D%20mo.md(%22Try%20again%2C%20total%20momentum%20stays%20zero%2C%20so%20%2450%20%5C%5Ctimes%203%20%3D%2070%20%5C%5Ctimes%20v_B%24.%22)%0A%20%20%20%20_fb%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.accordion(%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%22Compare%20your%20answer%22%3A%20mo.md(%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20Before%20pushing%20off%20the%20total%20momentum%20is%20zero.%20It%20must%20stay%20zero%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20so%20the%20two%20momenta%20must%20cancel%3A%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2450.0%20%5C%5Ctimes%203.00%20%3D%2070.0%20%5C%5Ctimes%20v_B%24%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%24v_B%20%3D%20%5C%5Cdfrac%7B150%7D%7B70.0%7D%20%3D%202.14%20%5C%5Ctext%7B%20m%2Fs%7D%24%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20B%20must%20move%20in%20the%20**opposite**%20direction%20so%20that%20its%20(negative)%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20momentum%20cancels%20A's%20(positive)%20momentum%2C%20keeping%20the%20total%20at%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20zero.%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20%20%20%20%20%20%20%20%20)%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell(hide_code%3DTrue)%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%0A%20%20%20%20------%0A%0A%20%20%20%20**Well%20done%2C%20that%20completes%20the%20four-part%20Momentum%20%26%20Impulse%20series.**%20You%0A%20%20%20%20can%20now%20calculate%20momentum%2C%20use%20impulse%20to%20find%20forces%20and%20changes%20in%0A%20%20%20%20momentum%2C%20and%20apply%20conservation%20of%20momentum%20to%20collisions.%0A%0A%20%20%20%20------%0A%0A%20%20%20%20Licensed%20under%20%5BCC%20BY-NC-SA%204.0%5D(https%3A%2F%2Fcreativecommons.org%2Flicenses%2Fby-nc-sa%2F4.0%2F)%0A%20%20%20%20%E2%80%94%20free%20to%20use%2C%20adapt%2C%20and%20share%20for%20non-commercial%20purposes%2C%20with%20attribution.%0A%20%20%20%20Developed%20with%20the%20assistance%20of%20Claude%20(Anthropic)%2C%20referenced%20against%20the%0A%20%20%20%20%5BVCE%20Physics%20Study%20Design%5D(https%3A%2F%2Fwww.vcaa.vic.edu.au%2Fcurriculum%2Fvce%2Fvce-study-designs%2Fphysics)%20(VCAA).%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0Aif%20__name__%20%3D%3D%20%22__main__%22%3A%0A%20%20%20%20app.run()%0A</marimo-code></head>
+  <body>
+    <div id="root"></div>
+    <script data-marimo="true">
+      Object.defineProperty(window, "__MARIMO_MOUNT_CONFIG__", {
+        value: Object.freeze({
+            "filename": "notebook.py",
+            "cwd": "",
+            "lspWorkspace": null,
+            "mode": "read",
+            "version": "0.23.14",
+            "serverToken": "unused",
+            "config": {"ai": {"custom_providers": {}, "enabled": true, "models": {"custom_models": [], "displayed_models": []}}, "completion": {"activate_on_typing": true, "auto_close_pairs": true, "copilot": false, "signature_hint_on_typing": false}, "diagnostics": {"sql_linter": true}, "display": {"cell_output": "below", "code_editor_font_size": 14, "dataframes": "rich", "default_table_max_columns": 50, "default_table_page_size": 10, "default_width": "medium", "reference_highlighting": true, "theme": "light"}, "formatting": {"line_length": 79}, "keymap": {"overrides": {}, "preset": "default"}, "language_servers": {"pylsp": {"enable_flake8": false, "enable_mypy": true, "enable_pydocstyle": false, "enable_pyflakes": false, "enable_pylint": false, "enable_ruff": true, "enabled": false}}, "mcp": {"mcpServers": {}, "presets": []}, "package_management": {"manager": "pip"}, "runtime": {"auto_instantiate": false, "auto_reload": "off", "default_csv_encoding": "utf-8", "default_sql_output": "auto", "on_cell_change": "autorun", "output_max_bytes": 8000000, "reactive_tests": true, "show_tracebacks": false, "std_stream_max_bytes": 1000000, "watcher_on_save": "lazy"}, "save": {"autosave": "off", "autosave_delay": 1000, "format_on_save": false}, "server": {"browser": "default", "follow_symlink": false}, "snippets": {"custom_paths": [], "include_default_snippets": true}},
+            "configOverrides": {},
+            "appConfig": {"sql_output": "auto", "width": "medium"},
+            "view": {"showAppCode": false},
+            "notebook": null,
+            "session": null,
+            "runtimeConfig": null,
+        }),
+        writable: false,
+        configurable: false,
+      });
+    </script>
+  </body>
+</html>

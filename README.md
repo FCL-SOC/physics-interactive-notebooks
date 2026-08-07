@@ -13,6 +13,13 @@ examples, a non-example, an interactive graph or simulator, and a short
 question set with instant feedback.
 
 - [Part 1: Momentum](https://fcl-soc.github.io/physics-interactive-notebooks/momentum-part1/) — $p = mv$
+- [Part 2](https://fcl-soc.github.io/physics-interactive-notebooks/momentum-part2/)
+- [Part 3](https://fcl-soc.github.io/physics-interactive-notebooks/momentum-part3/)
+- [Part 4](https://fcl-soc.github.io/physics-interactive-notebooks/momentum-part4/)
+
+### SUVAT — Constant Acceleration
+
+- [SUVAT Equations](https://fcl-soc.github.io/physics-interactive-notebooks/suvat/)
 
 ## License & attribution
 
