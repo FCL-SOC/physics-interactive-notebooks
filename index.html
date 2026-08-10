@@ -22,6 +22,23 @@
   p.intro {
     margin-bottom: 2rem;
   }
+  .view-toggle {
+    margin: 1.5rem 0 2rem;
+    font-size: 0.9rem;
+  }
+  .view-toggle label {
+    cursor: pointer;
+    user-select: none;
+  }
+  .teacher-link {
+    display: none;
+  }
+  body:has(#teacher-toggle:checked) .student-link {
+    display: none;
+  }
+  body:has(#teacher-toggle:checked) .teacher-link {
+    display: inline;
+  }
   details {
     margin: 0;
   }
@@ -73,6 +90,10 @@
 <body>
 <h1>VCE Physics — Interactive Notebooks</h1>
 
+<p class="view-toggle">
+  <label><input type="checkbox" id="teacher-toggle"> Teacher view (slideshow versions, where available)</label>
+</p>
+
 <details class="unit">
   <summary>Unit 1: How is energy useful to society?</summary>
 
@@ -96,8 +117,14 @@
 
     <details class="topic" open><summary>Concepts used to model motion</summary>
       <ul>
-        <li><a href="suvat/">SUVAT Equations</a></li>
-        <li><a href="momentum-part1/">Part 1: Momentum</a></li>
+        <li>
+          <a class="student-link" href="suvat/">SUVAT Equations</a>
+          <a class="teacher-link" href="suvat-teacher/">SUVAT Equations (slides)</a>
+        </li>
+        <li>
+          <a class="student-link" href="momentum-part1/">Part 1: Momentum</a>
+          <a class="teacher-link" href="momentum-part1-teacher/">Part 1: Momentum (slides)</a>
+        </li>
       </ul>
     </details>
 
@@ -107,9 +134,18 @@
 
     <details class="topic" open><summary>Energy and motion</summary>
       <ul>
-        <li><a href="momentum-part2/">Part 2: Change in momentum</a></li>
-        <li><a href="momentum-part3/">Part 3: Impulse in collisions</a></li>
-        <li><a href="momentum-part4/">Part 4: Conservation of momentum</a></li>
+        <li>
+          <a class="student-link" href="momentum-part2/">Part 2: Change in momentum</a>
+          <a class="teacher-link" href="momentum-part2-teacher/">Part 2: Change in momentum (slides)</a>
+        </li>
+        <li>
+          <a class="student-link" href="momentum-part3/">Part 3: Impulse in collisions</a>
+          <a class="teacher-link" href="momentum-part3-teacher/">Part 3: Impulse in collisions (slides)</a>
+        </li>
+        <li>
+          <a class="student-link" href="momentum-part4/">Part 4: Conservation of momentum</a>
+          <a class="teacher-link" href="momentum-part4-teacher/">Part 4: Conservation of momentum (slides)</a>
+        </li>
       </ul>
     </details>
 
