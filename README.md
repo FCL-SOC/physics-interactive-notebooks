@@ -6,20 +6,23 @@ Interactive notebooks covering key topics from VCE Physics.
 
 ## Notebooks
 
-### Momentum & Impulse (Unit 2, AOS1)
+The landing page organises notebooks by the VCE Physics study design hierarchy:
+Unit → Area of Study → Topic. Currently populated:
 
-A series of short parts, each about 20 minutes. Each part has worked
-examples, a non-example, an interactive graph or simulator, and a short
-question set with instant feedback.
+### Unit 2: How does physics help us to understand the world?
 
-- [Part 1: Momentum](https://fcl-soc.github.io/physics-interactive-notebooks/momentum-part1/) — $p = mv$
-- [Part 2](https://fcl-soc.github.io/physics-interactive-notebooks/momentum-part2/)
-- [Part 3](https://fcl-soc.github.io/physics-interactive-notebooks/momentum-part3/)
-- [Part 4](https://fcl-soc.github.io/physics-interactive-notebooks/momentum-part4/)
+#### Area of Study 1: How is motion understood?
 
-### SUVAT — Constant Acceleration
-
+**Concepts used to model motion**
 - [SUVAT Equations](https://fcl-soc.github.io/physics-interactive-notebooks/suvat/)
+- [Part 1: Momentum](https://fcl-soc.github.io/physics-interactive-notebooks/momentum-part1/) — $p = mv$
+
+**Energy and motion**
+- [Part 2: Change in momentum](https://fcl-soc.github.io/physics-interactive-notebooks/momentum-part2/)
+- [Part 3: Impulse in collisions](https://fcl-soc.github.io/physics-interactive-notebooks/momentum-part3/)
+- [Part 4: Conservation of momentum](https://fcl-soc.github.io/physics-interactive-notebooks/momentum-part4/)
+
+All other Units/Areas of Study are listed on the site but currently have no notebooks.
 
 ## License & attribution
 

@@ -19,23 +19,46 @@
     font-weight: normal;
     margin-bottom: 0.25rem;
   }
-  h2 {
-    font-size: 1rem;
-    font-weight: normal;
-    font-style: italic;
-    margin-top: 2.5rem;
-    margin-bottom: 0.5rem;
-  }
   p.intro {
     margin-bottom: 2rem;
+  }
+  details {
+    margin: 0;
+  }
+  summary {
+    cursor: pointer;
+  }
+  details.unit {
+    margin-top: 1.25rem;
+  }
+  details.unit > summary {
+    font-size: 1.05rem;
+  }
+  details.aos {
+    margin: 0.5rem 0 0.5rem 1.5rem;
+  }
+  details.aos > summary {
+    font-style: italic;
+  }
+  details.topic {
+    margin: 0.35rem 0 0.35rem 1.5rem;
+  }
+  details.topic > summary {
+    font-size: 0.95rem;
+  }
+  p.none {
+    margin: 0.35rem 0 0.35rem 1.5rem;
+    color: #666;
+    font-size: 0.9rem;
+    font-style: italic;
   }
   ul {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 0.35rem 0 0.35rem 1.5rem;
   }
   li {
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.3rem;
   }
   a {
     color: #000;
@@ -49,20 +72,94 @@
 </head>
 <body>
 <h1>VCE Physics — Interactive Notebooks</h1>
-<p class="intro">Interactive marimo notebooks for exploring physics concepts.</p>
+<p class="intro">Interactive marimo notebooks for exploring physics concepts. Click through Units → Areas of Study → Topics.</p>
 
-<h2>Momentum &amp; Impulse (Unit 2, AOS1)</h2>
-<ul>
-  <li><a href="momentum-part1/">Part 1: Momentum</a></li>
-  <li><a href="momentum-part2/">Part 2</a></li>
-  <li><a href="momentum-part3/">Part 3</a></li>
-  <li><a href="momentum-part4/">Part 4</a></li>
-</ul>
+<details class="unit">
+  <summary>Unit 1: How is energy useful to society?</summary>
 
-<h2>SUVAT — Constant Acceleration</h2>
-<ul>
-  <li><a href="suvat/">SUVAT Equations</a></li>
-</ul>
+  <details class="aos"><summary>Area of Study 1: How are light and heat explained?</summary>
+    <p class="none">No notebooks yet.</p>
+  </details>
+
+  <details class="aos"><summary>Area of Study 2: How is energy from the nucleus utilised?</summary>
+    <p class="none">No notebooks yet.</p>
+  </details>
+
+  <details class="aos"><summary>Area of Study 3: How can electricity be used to transfer energy?</summary>
+    <p class="none">No notebooks yet.</p>
+  </details>
+</details>
+
+<details class="unit" open>
+  <summary>Unit 2: How does physics help us to understand the world?</summary>
+
+  <details class="aos" open><summary>Area of Study 1: How is motion understood?</summary>
+
+    <details class="topic" open><summary>Concepts used to model motion</summary>
+      <ul>
+        <li><a href="suvat/">SUVAT Equations</a></li>
+        <li><a href="momentum-part1/">Part 1: Momentum</a></li>
+      </ul>
+    </details>
+
+    <details class="topic"><summary>Forces and motion</summary>
+      <p class="none">No notebooks yet.</p>
+    </details>
+
+    <details class="topic" open><summary>Energy and motion</summary>
+      <ul>
+        <li><a href="momentum-part2/">Part 2: Change in momentum</a></li>
+        <li><a href="momentum-part3/">Part 3: Impulse in collisions</a></li>
+        <li><a href="momentum-part4/">Part 4: Conservation of momentum</a></li>
+      </ul>
+    </details>
+
+    <details class="topic"><summary>Equilibrium</summary>
+      <p class="none">No notebooks yet.</p>
+    </details>
+
+    <details class="topic"><summary>Application of motion</summary>
+      <p class="none">No notebooks yet.</p>
+    </details>
+
+  </details>
+
+  <details class="aos"><summary>Area of Study 2: Options — How does physics inform contemporary issues and applications in society?</summary>
+    <p class="none">No notebooks yet.</p>
+  </details>
+
+  <details class="aos"><summary>Area of Study 3: How do physicists investigate questions?</summary>
+    <p class="none">No notebooks yet.</p>
+  </details>
+</details>
+
+<details class="unit">
+  <summary>Unit 3: How do fields explain motion and electricity?</summary>
+
+  <details class="aos"><summary>Area of Study 1: How do physicists explain motion in two dimensions?</summary>
+    <p class="none">No notebooks yet.</p>
+  </details>
+
+  <details class="aos"><summary>Area of Study 2: How do things move without contact?</summary>
+    <p class="none">No notebooks yet.</p>
+  </details>
+
+  <details class="aos"><summary>Area of Study 3: How are fields used in electricity generation?</summary>
+    <p class="none">No notebooks yet.</p>
+  </details>
+</details>
+
+<details class="unit">
+  <summary>Unit 4: How have creative ideas and investigation revolutionised thinking in physics?</summary>
+
+  <details class="aos"><summary>Area of Study 1: How has understanding about the physical world changed?</summary>
+    <p class="none">No notebooks yet.</p>
+  </details>
+
+  <details class="aos"><summary>Area of Study 2: How is scientific inquiry used to investigate fields, motion or light?</summary>
+    <p class="none">No notebooks yet.</p>
+  </details>
+</details>
 
 <footer>
   Licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>
