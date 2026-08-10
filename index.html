@@ -22,11 +22,14 @@
   p.intro {
     margin-bottom: 2rem;
   }
-  .view-toggle {
+  .toggles {
     margin: 1.5rem 0 2rem;
     font-size: 0.9rem;
   }
-  .view-toggle label {
+  .toggles p {
+    margin: 0.4rem 0;
+  }
+  .toggles label {
     cursor: pointer;
     user-select: none;
   }
@@ -38,6 +41,25 @@
   }
   body:has(#teacher-toggle:checked) .teacher-link {
     display: inline;
+  }
+  #study-design-view {
+    display: none;
+  }
+  body:has(#view-toggle:checked) #topic-view {
+    display: none;
+  }
+  body:has(#view-toggle:checked) #study-design-view {
+    display: block;
+  }
+  h2 {
+    font-size: 1rem;
+    font-weight: normal;
+    font-style: italic;
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  h2:first-child {
+    margin-top: 0;
   }
   details {
     margin: 0;
@@ -90,9 +112,44 @@
 <body>
 <h1>VCE Physics — Interactive Notebooks</h1>
 
-<p class="view-toggle">
-  <label><input type="checkbox" id="teacher-toggle"> Teacher view (slideshow versions, where available)</label>
-</p>
+<div class="toggles">
+  <p><label><input type="checkbox" id="view-toggle"> Study design view (Unit &rarr; Area of Study &rarr; Topic)</label></p>
+  <p><label><input type="checkbox" id="teacher-toggle"> Teacher view (slideshow versions, where available)</label></p>
+</div>
+
+<div id="topic-view">
+
+  <h2>SUVAT — Constant Acceleration</h2>
+  <ul>
+    <li>
+      <a class="student-link" href="suvat/">SUVAT Equations</a>
+      <a class="teacher-link" href="suvat-teacher/">SUVAT Equations (slides)</a>
+    </li>
+  </ul>
+
+  <h2>Momentum &amp; Impulse (Unit 2, AOS1)</h2>
+  <ul>
+    <li>
+      <a class="student-link" href="momentum-part1/">Part 1: Momentum</a>
+      <a class="teacher-link" href="momentum-part1-teacher/">Part 1: Momentum (slides)</a>
+    </li>
+    <li>
+      <a class="student-link" href="momentum-part2/">Part 2: Change in momentum</a>
+      <a class="teacher-link" href="momentum-part2-teacher/">Part 2: Change in momentum (slides)</a>
+    </li>
+    <li>
+      <a class="student-link" href="momentum-part3/">Part 3: Impulse in collisions</a>
+      <a class="teacher-link" href="momentum-part3-teacher/">Part 3: Impulse in collisions (slides)</a>
+    </li>
+    <li>
+      <a class="student-link" href="momentum-part4/">Part 4: Conservation of momentum</a>
+      <a class="teacher-link" href="momentum-part4-teacher/">Part 4: Conservation of momentum (slides)</a>
+    </li>
+  </ul>
+
+</div>
+
+<div id="study-design-view">
 
 <details class="unit">
   <summary>Unit 1: How is energy useful to society?</summary>
@@ -195,6 +252,8 @@
     <p class="none">No notebooks yet.</p>
   </details>
 </details>
+
+</div>
 
 <footer>
   Licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>
