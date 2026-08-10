@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate teacher "slideshow" versions of each momentum notebook.
+"""Generate teacher "slideshow" versions of each notebook in NOTEBOOKS.
 
 A teacher version is identical to the student notebook, but its marimo App
 references a slides layout so the WASM export renders as a reveal.js-style
@@ -16,7 +16,7 @@ slide types:
     - "skip"     : the cell is hidden (the imports cell)
 
 These teacher .py files and their layout JSONs are GENERATED from the student
-sources, do not hand-edit them. Edit source/momentum-part<N>.py, then re-run
+sources, do not hand-edit them. Edit the relevant source/<name>.py, then re-run
 this script (and ./build.sh) to regenerate.
 """
 from __future__ import annotations
@@ -28,7 +28,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 SOURCE = ROOT / "source"
 LAYOUTS = SOURCE / "layouts"
-PARTS = [1, 2, 3, 4]
+NOTEBOOKS = ["momentum-part1", "momentum-part2", "momentum-part3", "momentum-part4", "suvat"]
 
 # A cell starts a new slide when its markdown contains a heading (#..######)
 # or a question marker (**Q1 ...**, **1. ...**, **Step ...**-free) at line start.
@@ -53,19 +53,19 @@ def classify(cell_src: str, is_first: bool) -> str:
 
 def main() -> None:
     LAYOUTS.mkdir(parents=True, exist_ok=True)
-    for n in PARTS:
-        src_path = SOURCE / f"momentum-part{n}.py"
+    for name in NOTEBOOKS:
+        src_path = SOURCE / f"{name}.py"
         if not src_path.exists():
             print(f"skip: {src_path} not found")
             continue
         src = src_path.read_text(encoding="utf-8")
 
-        layout_name = f"momentum-part{n}-teacher.slides.json"
+        layout_name = f"{name}-teacher.slides.json"
         teacher_src = src.replace(
             'app = marimo.App(width="medium")',
             f'app = marimo.App(width="medium", layout_file="layouts/{layout_name}")',
         )
-        (SOURCE / f"momentum-part{n}-teacher.py").write_text(teacher_src, encoding="utf-8")
+        (SOURCE / f"{name}-teacher.py").write_text(teacher_src, encoding="utf-8")
 
         cells = split_cells(src)
         types = [classify(c, i == 0) for i, c in enumerate(cells)]
@@ -85,7 +85,7 @@ def main() -> None:
 
         n_slides = types.count("slide")
         n_frag = types.count("fragment")
-        print(f"part{n}: {len(cells)} cells -> {n_slides} slides, {n_frag} fragments, 1 skipped")
+        print(f"{name}: {len(cells)} cells -> {n_slides} slides, {n_frag} fragments, 1 skipped")
 
 
 if __name__ == "__main__":
