@@ -128,16 +128,20 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mass_slider1 = mo.ui.slider(
-        start=1, stop=30, step=1, value=20, label="Ball 1 mass, $m$ (kg)"
+        start=1, stop=30, step=1, value=20, label="Ball 1 mass, $m$ (kg)",
+        debounce=True,
     )
     velocity_slider1 = mo.ui.slider(
-        start=-20, stop=20, step=1, value=-5, label="Ball 1 velocity, $v$ (m/s)"
+        start=-20, stop=20, step=1, value=-5, label="Ball 1 velocity, $v$ (m/s)",
+        debounce=True,
     )
     mass_slider2 = mo.ui.slider(
-        start=1, stop=20, step=1, value=10, label="Ball 2 mass, $m$ (kg)"
+        start=1, stop=20, step=1, value=10, label="Ball 2 mass, $m$ (kg)",
+        debounce=True,
     )
     velocity_slider2 = mo.ui.slider(
-        start=-38, stop=38, step=1, value=10, label="Ball 2 velocity, $v$ (m/s)"
+        start=-38, stop=38, step=1, value=10, label="Ball 2 velocity, $v$ (m/s)",
+        debounce=True,
     )
 
     mo.hstack(
