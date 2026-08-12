@@ -8,9 +8,10 @@ app = marimo.App(width="medium", layout_file="layouts/momentum-part1-teacher.sli
 def _():
     import marimo as mo
     import numpy as np
-    import matplotlib.pyplot as plt
+    import altair as alt
+    import pandas as pd
 
-    return mo, plt
+    return mo, alt, pd
 
 
 @app.cell(hide_code=True)
@@ -168,7 +169,7 @@ def _(mass_slider1, mass_slider2, mo, velocity_slider1, velocity_slider2):
 
 
 @app.cell(hide_code=True)
-def _(mass_slider1, mass_slider2, plt, velocity_slider1, velocity_slider2):
+def _(alt, mass_slider1, mass_slider2, pd, velocity_slider1, velocity_slider2):
     _m1 = mass_slider1.value
     _v1 = velocity_slider1.value
     _p1 = _m1 * _v1
@@ -182,47 +183,53 @@ def _(mass_slider1, mass_slider2, plt, velocity_slider1, velocity_slider2):
     _reds = ["#fcae91", "#fb6a4a", "#cb181d"]
     _blues = ["#bdd7e7", "#6baed6", "#2171b5"]
 
-    def _panel(ax, label, value, color, ylim, unit):
-        ax.bar([label], [value], color=color, edgecolor="black", linewidth=0.6)
-        ax.axhline(0, color="black", linewidth=0.8)
-        ax.set_ylabel(f"{label} ({unit})")
-        ax.set_ylim(-ylim, ylim)
-        ax.grid(which="major", alpha=0.5, axis="y")
-        ax.grid(which="minor", alpha=0.3, axis="y")
-        ax.minorticks_on()
-        # Value label on the bar so meaning does not rely on colour alone.
-        _va = "bottom" if value >= 0 else "top"
-        _off = 0.03 * ylim if value >= 0 else -0.03 * ylim
-        ax.annotate(
-            f"{value:,.0f}",
-            xy=(0, value),
-            xytext=(0, value + _off),
-            ha="center",
-            va=_va,
-            fontweight="bold",
-            fontsize=11,
+    def _panel(label, value, color, ylim, unit, title=None, title_color=None):
+        _df = pd.DataFrame({"label": [label], "value": [value]})
+        _bar = (
+            alt.Chart(_df)
+            .mark_bar(color=color, stroke="black", strokeWidth=0.6)
+            .encode(
+                x=alt.X("label:N", title=None, axis=alt.Axis(labels=False, ticks=False)),
+                y=alt.Y(
+                    "value:Q",
+                    title=f"{label} ({unit})",
+                    scale=alt.Scale(domain=[-ylim, ylim]),
+                ),
+            )
         )
+        _zero = (
+            alt.Chart(pd.DataFrame({"y": [0]}))
+            .mark_rule(color="black", strokeWidth=0.8)
+            .encode(y="y:Q")
+        )
+        # Value label on the bar so meaning does not rely on colour alone.
+        _text = _bar.mark_text(
+            align="center",
+            baseline="bottom" if value >= 0 else "top",
+            dy=-6 if value >= 0 else 6,
+            fontWeight="bold",
+            fontSize=11,
+        ).encode(text=alt.Text("value:Q", format=",.0f"))
+        _chart = (_bar + _zero + _text).properties(width=110, height=180)
+        if title:
+            _chart = _chart.properties(
+                title=alt.TitleParams(title, color=title_color, fontSize=13, fontWeight="bold")
+            )
+        return _chart
 
-    fig1, ([ax1a, ax1b, ax1c], [ax1d, ax1e, ax1f]) = plt.subplots(
-        2, 3, figsize=(9, 6)
+    # Row 1: Ball 1, row 2: Ball 2 — matches the original panel-grid layout.
+    _row1 = alt.hconcat(
+        _panel("Mass", _m1, _reds[0], 33, "kg"),
+        _panel("Velocity", _v1, _reds[1], 40, "m/s", title="Ball 1", title_color="#cb181d"),
+        _panel("Momentum", _p1, _reds[2], 800, "kg m/s"),
+    )
+    _row2 = alt.hconcat(
+        _panel("Mass", _m2, _blues[0], 33, "kg"),
+        _panel("Velocity", _v2, _blues[1], 40, "m/s", title="Ball 2", title_color="#2171b5"),
+        _panel("Momentum", _p2, _blues[2], 800, "kg m/s"),
     )
 
-    # Ball 1 (top row) — shades of red
-    _panel(ax1a, "Mass", _m1, _reds[0], 33, "kg")
-    _panel(ax1b, "Velocity", _v1, _reds[1], 40, "m/s")
-    _panel(ax1c, "Momentum", _p1, _reds[2], 800, "kg m/s")
-    ax1a.set_ylabel("Mass (kg)")
-
-    # Ball 2 (bottom row) — shades of blue
-    _panel(ax1d, "Mass", _m2, _blues[0], 33, "kg")
-    _panel(ax1e, "Velocity", _v2, _blues[1], 40, "m/s")
-    _panel(ax1f, "Momentum", _p2, _blues[2], 800, "kg m/s")
-    ax1d.set_ylabel("Mass (kg)")
-
-    ax1b.set_title("Ball 1", fontsize=13, fontweight="bold", color="#cb181d")
-    ax1e.set_title("Ball 2", fontsize=13, fontweight="bold", color="#2171b5")
-
-    fig1.tight_layout()
+    fig1 = alt.vconcat(_row1, _row2).configure_view(strokeWidth=0)
     fig1
     return
 
