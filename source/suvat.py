@@ -8,9 +8,80 @@ app = marimo.App(width="medium")
 def _():
     import marimo as mo
     import numpy as np
-    import matplotlib.pyplot as plt
+    import altair as alt
 
-    return mo, np, plt
+    return alt, mo, np
+
+
+@app.cell(hide_code=True)
+def _(alt):
+    def line_chart(
+        x, y, color, xlim, ylim, xlabel, ylabel, title,
+        fill=False, fill_label=None, fill_x=None, fill_y=None,
+        scatter=None, scatter_color="#d62728",
+        width=480, height=320,
+    ):
+        # Shared single-panel line-chart builder for all SUVAT graphs: a
+        # plain Vega-Lite spec dict (not chained Altair calls, which are
+        # much slower to rebuild on every slider move — see momentum-part1
+        # for the measured comparison). Edit colours/labels/domains as
+        # plain dict values below; each chart cell just calls this with
+        # its own x/y data and options. fill_x/fill_y let the shaded area
+        # cover a different (usually shorter) range than the line itself;
+        # they default to the line's own x/y when not given.
+        _pts = [{"x": float(_x), "y": float(_y)} for _x, _y in zip(x, y)]
+        _x_enc = {"field": "x", "type": "quantitative", "title": xlabel,
+                   "scale": {"domain": list(xlim)}, "axis": {"grid": False}}
+        _y_enc = {"field": "y", "type": "quantitative", "title": ylabel,
+                   "scale": {"domain": list(ylim)}, "axis": {"grid": False}}
+        _layers = []
+        if fill:
+            _fill_x = x if fill_x is None else fill_x
+            _fill_y = y if fill_y is None else fill_y
+            _fill_pts = [{"x": float(_x), "y": float(_y)} for _x, _y in zip(_fill_x, _fill_y)]
+            _layers.append({
+                "data": {"values": _fill_pts},
+                "mark": {"type": "area", "color": color, "opacity": 0.3},
+                "encoding": {"x": _x_enc, "y": _y_enc},
+            })
+        _layers.append({
+            "mark": {"type": "line", "color": color, "strokeWidth": 2},
+            "encoding": {"x": _x_enc, "y": _y_enc},
+        })
+        _layers.append({
+            "data": {"values": [{"y": 0}]},
+            "mark": {"type": "rule", "color": "black", "strokeWidth": 0.8},
+            "encoding": {"y": {"field": "y", "type": "quantitative"}},
+        })
+        if fill and fill_label:
+            _mid = _fill_pts[len(_fill_pts) // 2]
+            _layers.append({
+                "data": {"values": [{"x": _mid["x"], "y": _mid["y"] / 2}]},
+                "mark": {"type": "text", "fontWeight": "bold", "fontSize": 11},
+                "encoding": {
+                    "x": {"field": "x", "type": "quantitative"},
+                    "y": {"field": "y", "type": "quantitative"},
+                    "text": {"value": fill_label},
+                },
+            })
+        if scatter:
+            _layers.append({
+                "data": {"values": [{"x": scatter[0], "y": scatter[1]}]},
+                "mark": {"type": "point", "color": scatter_color, "size": 70, "filled": True},
+                "encoding": {
+                    "x": {"field": "x", "type": "quantitative"},
+                    "y": {"field": "y", "type": "quantitative"},
+                },
+            })
+        return {
+            "data": {"values": _pts},
+            "layer": _layers,
+            "width": width,
+            "height": height,
+            "title": title,
+        }
+
+    return (line_chart,)
 
 
 @app.cell(hide_code=True)
@@ -80,25 +151,21 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(a_slider1, np, plt, t_slider1, u_slider1):
+def _(a_slider1, alt, line_chart, mo, np, t_slider1, u_slider1):
     _t_range = np.linspace(0, 10, 200)
     _v_range = u_slider1.value + a_slider1.value * _t_range
 
-    fig1, ax1 = plt.subplots(figsize=(6, 4))
-    ax1.plot(_t_range, _v_range, color="tab:blue")
-    ax1.axhline(0, color="black", linewidth=0.8)
-    ax1.scatter(
-        [t_slider1.value],
-        [u_slider1.value + a_slider1.value * t_slider1.value],
-        color="tab:red",
-        zorder=5,
+    fig1 = alt.Chart.from_dict(
+        line_chart(
+            _t_range, _v_range, "#1f77b4",
+            xlim=(0, 10), ylim=(-50, 80),
+            xlabel="time, t (s)", ylabel="velocity, v (m/s)",
+            title="v-t graph, gradient = acceleration",
+            scatter=(t_slider1.value, u_slider1.value + a_slider1.value * t_slider1.value),
+        ),
+        validate=False,
     )
-    ax1.set_xlim(0, 10)
-    ax1.set_ylim(-50, 80)
-    ax1.set_xlabel("time, t (s)")
-    ax1.set_ylabel("velocity, v (m/s)")
-    ax1.set_title("v-t graph, gradient = acceleration")
-    fig1
+    mo.center(fig1)
     return
 
 
@@ -113,9 +180,9 @@ def _(a_slider1, mo, t_slider1, u_slider1):
 
 @app.cell(hide_code=True)
 def _(mo):
-    u_slider1 = mo.ui.slider(start=-20, stop=30, step=1, value=0, label="initial velocity, $u$ (m/s)")
-    a_slider1 = mo.ui.slider(start=-10, stop=10, step=0.5, value=2, label="acceleration, $a$ (m/s²)")
-    t_slider1 = mo.ui.slider(start=0, stop=10, step=0.5, value=5, label="time, $t$ (s)")
+    u_slider1 = mo.ui.slider(start=-20, stop=30, step=1, value=0, label="initial velocity, $u$ (m/s)", debounce=True)
+    a_slider1 = mo.ui.slider(start=-10, stop=10, step=0.5, value=2, label="acceleration, $a$ (m/s²)", debounce=True)
+    t_slider1 = mo.ui.slider(start=0, stop=10, step=0.5, value=5, label="time, $t$ (s)", debounce=True)
     mo.hstack([u_slider1, a_slider1, t_slider1], justify="start", gap=2)
     return a_slider1, t_slider1, u_slider1
 
@@ -227,23 +294,23 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(a_slider2, np, plt, t_slider2, u_slider2):
+def _(a_slider2, alt, line_chart, mo, np, t_slider2, u_slider2):
     _t_range = np.linspace(0, 10, 200)
     _v_range = u_slider2.value + a_slider2.value * _t_range
     _t_fill = np.linspace(0, t_slider2.value, 100)
     _v_fill = u_slider2.value + a_slider2.value * _t_fill
 
-    fig2, ax2 = plt.subplots(figsize=(6, 4))
-    ax2.plot(_t_range, _v_range, color="tab:blue")
-    ax2.fill_between(_t_fill, _v_fill, color="tab:blue", alpha=0.3, label="area = $s$")
-    ax2.axhline(0, color="black", linewidth=0.8)
-    ax2.set_xlim(0, 10)
-    ax2.set_ylim(-20, 60)
-    ax2.set_xlabel("time, t (s)")
-    ax2.set_ylabel("velocity, v (m/s)")
-    ax2.set_title("Area under a v-t graph = displacement")
-    ax2.legend()
-    fig2
+    fig2 = alt.Chart.from_dict(
+        line_chart(
+            _t_range, _v_range, "#1f77b4",
+            xlim=(0, 10), ylim=(-20, 60),
+            xlabel="time, t (s)", ylabel="velocity, v (m/s)",
+            title="Area under a v-t graph = displacement",
+            fill=True, fill_label="area = s", fill_x=_t_fill, fill_y=_v_fill,
+        ),
+        validate=False,
+    )
+    mo.center(fig2)
     return
 
 
@@ -259,9 +326,9 @@ def _(a_slider2, mo, t_slider2, u_slider2):
 
 @app.cell(hide_code=True)
 def _(mo):
-    u_slider2 = mo.ui.slider(start=0, stop=20, step=1, value=5, label="initial velocity, $u$ (m/s)")
-    a_slider2 = mo.ui.slider(start=-5, stop=5, step=0.5, value=2, label="acceleration, $a$ (m/s²)")
-    t_slider2 = mo.ui.slider(start=0, stop=10, step=0.5, value=3, label="time, $t$ (s)")
+    u_slider2 = mo.ui.slider(start=0, stop=20, step=1, value=5, label="initial velocity, $u$ (m/s)", debounce=True)
+    a_slider2 = mo.ui.slider(start=-5, stop=5, step=0.5, value=2, label="acceleration, $a$ (m/s²)", debounce=True)
+    t_slider2 = mo.ui.slider(start=0, stop=10, step=0.5, value=3, label="time, $t$ (s)", debounce=True)
     mo.hstack([u_slider2, a_slider2, t_slider2], justify="start", gap=2)
     return a_slider2, t_slider2, u_slider2
 
@@ -373,21 +440,22 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(a_slider3, np, plt, s_slider3, u_slider3):
+def _(a_slider3, alt, line_chart, mo, np, s_slider3, u_slider3):
     _s_range = np.linspace(0, 100, 200)
     _v2_range = u_slider3.value ** 2 + 2 * a_slider3.value * _s_range
-
-    fig3, ax3 = plt.subplots(figsize=(6, 4))
-    ax3.plot(_s_range, _v2_range, color="tab:purple")
-    ax3.axhline(0, color="black", linewidth=0.8)
     _v2_point = u_slider3.value ** 2 + 2 * a_slider3.value * s_slider3.value
-    ax3.scatter([s_slider3.value], [_v2_point], color="tab:red", zorder=5)
-    ax3.set_xlim(0, 100)
-    ax3.set_ylim(-200, 1200)
-    ax3.set_xlabel("displacement, s (m)")
-    ax3.set_ylabel("velocity squared, $v^2$ (m$^2$/s$^2$)")
-    ax3.set_title("$v^2$ vs $s$, gradient = $2a$")
-    fig3
+
+    fig3 = alt.Chart.from_dict(
+        line_chart(
+            _s_range, _v2_range, "#9467bd",
+            xlim=(0, 100), ylim=(-200, 1200),
+            xlabel="displacement, s (m)", ylabel="velocity squared, v² (m²/s²)",
+            title="v² vs s, gradient = 2a",
+            scatter=(s_slider3.value, _v2_point),
+        ),
+        validate=False,
+    )
+    mo.center(fig3)
     return
 
 
@@ -406,9 +474,9 @@ def _(a_slider3, mo, s_slider3, u_slider3):
 
 @app.cell(hide_code=True)
 def _(mo):
-    u_slider3 = mo.ui.slider(start=0, stop=30, step=1, value=10, label="initial velocity, $u$ (m/s)")
-    a_slider3 = mo.ui.slider(start=-10, stop=10, step=0.5, value=3, label="acceleration, $a$ (m/s²)")
-    s_slider3 = mo.ui.slider(start=0, stop=100, step=1, value=40, label="displacement, $s$ (m)")
+    u_slider3 = mo.ui.slider(start=0, stop=30, step=1, value=10, label="initial velocity, $u$ (m/s)", debounce=True)
+    a_slider3 = mo.ui.slider(start=-10, stop=10, step=0.5, value=3, label="acceleration, $a$ (m/s²)", debounce=True)
+    s_slider3 = mo.ui.slider(start=0, stop=100, step=1, value=40, label="displacement, $s$ (m)", debounce=True)
     mo.hstack([u_slider3, a_slider3, s_slider3], justify="start", gap=2)
     return a_slider3, s_slider3, u_slider3
 
@@ -523,33 +591,29 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo, plt, t_slider4, u_slider4, v_slider4):
+def _(alt, line_chart, mo, t_slider4, u_slider4, v_slider4):
     _t = t_slider4.value
     _u = u_slider4.value
     _v = v_slider4.value
     _avg = (_u + _v) / 2
-
-    fig4, (ax4a, ax4b) = plt.subplots(1, 2, figsize=(9, 3.5))
-
-    ax4a.plot([0, _t], [_u, _v], color="tab:blue")
-    ax4a.fill_between([0, _t], [_u, _v], color="tab:blue", alpha=0.3)
-    ax4a.axhline(0, color="black", linewidth=0.8)
-    ax4a.set_title("Actual v-t graph")
-    ax4a.set_xlabel("time, t (s)")
-    ax4a.set_ylabel("velocity (m/s)")
-
-    ax4b.plot([0, _t], [_avg, _avg], color="tab:orange")
-    ax4b.fill_between([0, _t], [_avg, _avg], color="tab:orange", alpha=0.3)
-    ax4b.axhline(0, color="black", linewidth=0.8)
-    ax4b.set_title("Equivalent average-velocity rectangle")
-    ax4b.set_xlabel("time, t (s)")
-    ax4b.set_ylabel("velocity (m/s)")
-
     _ylim = max(abs(_u), abs(_v), abs(_avg), 1) * 1.3
-    ax4a.set_ylim(-_ylim, _ylim)
-    ax4b.set_ylim(-_ylim, _ylim)
-    fig4.tight_layout()
-    fig4
+
+    _panel_a = line_chart(
+        [0, _t], [_u, _v], "#1f77b4",
+        xlim=(0, max(_t, 0.1)), ylim=(-_ylim, _ylim),
+        xlabel="time, t (s)", ylabel="velocity (m/s)",
+        title="Actual v-t graph",
+        fill=True, width=280, height=280,
+    )
+    _panel_b = line_chart(
+        [0, _t], [_avg, _avg], "#ff7f0e",
+        xlim=(0, max(_t, 0.1)), ylim=(-_ylim, _ylim),
+        xlabel="time, t (s)", ylabel="velocity (m/s)",
+        title="Equivalent average-velocity rectangle",
+        fill=True, width=280, height=280,
+    )
+    fig4 = alt.Chart.from_dict({"hconcat": [_panel_a, _panel_b]}, validate=False)
+    mo.center(fig4)
     return
 
 
@@ -564,9 +628,9 @@ def _(mo, t_slider4, u_slider4, v_slider4):
 
 @app.cell(hide_code=True)
 def _(mo):
-    u_slider4 = mo.ui.slider(start=-20, stop=20, step=1, value=4, label="initial velocity, $u$ (m/s)")
-    v_slider4 = mo.ui.slider(start=-20, stop=20, step=1, value=16, label="final velocity, $v$ (m/s)")
-    t_slider4 = mo.ui.slider(start=0.5, stop=10, step=0.5, value=6, label="time, $t$ (s)")
+    u_slider4 = mo.ui.slider(start=-20, stop=20, step=1, value=4, label="initial velocity, $u$ (m/s)", debounce=True)
+    v_slider4 = mo.ui.slider(start=-20, stop=20, step=1, value=16, label="final velocity, $v$ (m/s)", debounce=True)
+    t_slider4 = mo.ui.slider(start=0.5, stop=10, step=0.5, value=6, label="time, $t$ (s)", debounce=True)
     mo.hstack([u_slider4, v_slider4, t_slider4], justify="start", gap=2)
     return t_slider4, u_slider4, v_slider4
 
@@ -681,24 +745,24 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(a_slider5, np, plt, t_slider5, v_slider5):
+def _(a_slider5, alt, line_chart, mo, np, t_slider5, v_slider5):
     _t_end = t_slider5.value
     _u = v_slider5.value - a_slider5.value * _t_end
     _t_range = np.linspace(0, _t_end, 200)
     _v_range = _u + a_slider5.value * _t_range
 
-    fig5, ax5 = plt.subplots(figsize=(6, 4))
-    ax5.plot(_t_range, _v_range, color="tab:green")
-    ax5.fill_between(_t_range, _v_range, color="tab:green", alpha=0.3, label="area = $s$")
-    ax5.axhline(0, color="black", linewidth=0.8)
-    ax5.scatter([_t_end], [v_slider5.value], color="tab:red", zorder=5)
-    ax5.set_xlim(0, 10)
-    ax5.set_ylim(-20, 60)
-    ax5.set_xlabel("time, t (s)")
-    ax5.set_ylabel("velocity, v (m/s)")
-    ax5.set_title("v-t graph, ending at the chosen final velocity")
-    ax5.legend()
-    fig5
+    fig5 = alt.Chart.from_dict(
+        line_chart(
+            _t_range, _v_range, "#2ca02c",
+            xlim=(0, 10), ylim=(-20, 60),
+            xlabel="time, t (s)", ylabel="velocity, v (m/s)",
+            title="v-t graph, ending at the chosen final velocity",
+            fill=True, fill_label="area = s",
+            scatter=(_t_end, v_slider5.value),
+        ),
+        validate=False,
+    )
+    mo.center(fig5)
     return
 
 
@@ -714,9 +778,9 @@ def _(a_slider5, mo, t_slider5, v_slider5):
 
 @app.cell(hide_code=True)
 def _(mo):
-    v_slider5 = mo.ui.slider(start=0, stop=40, step=1, value=25, label="final velocity, $v$ (m/s)")
-    a_slider5 = mo.ui.slider(start=-10, stop=10, step=0.5, value=-4, label="acceleration, $a$ (m/s²)")
-    t_slider5 = mo.ui.slider(start=0.5, stop=10, step=0.5, value=3, label="time, $t$ (s)")
+    v_slider5 = mo.ui.slider(start=0, stop=40, step=1, value=25, label="final velocity, $v$ (m/s)", debounce=True)
+    a_slider5 = mo.ui.slider(start=-10, stop=10, step=0.5, value=-4, label="acceleration, $a$ (m/s²)", debounce=True)
+    t_slider5 = mo.ui.slider(start=0.5, stop=10, step=0.5, value=3, label="time, $t$ (s)", debounce=True)
     mo.hstack([v_slider5, a_slider5, t_slider5], justify="start", gap=2)
     return a_slider5, t_slider5, v_slider5
 

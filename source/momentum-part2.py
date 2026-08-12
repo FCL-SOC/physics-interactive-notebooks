@@ -7,10 +7,63 @@ app = marimo.App(width="medium")
 @app.cell(hide_code=True)
 def _():
     import marimo as mo
-    import numpy as np
-    import matplotlib.pyplot as plt
+    import altair as alt
 
-    return mo, np, plt
+    return alt, mo
+
+
+@app.cell(hide_code=True)
+def _(alt):
+    def area_chart(
+        x, y, color, xlim, ylim, xlabel, ylabel, title, label, label_xy,
+        width=480, height=320,
+    ):
+        # Shared "area under a force-time line" chart builder: a plain
+        # Vega-Lite spec dict (not chained Altair calls, which are much
+        # slower to rebuild on every slider move — see momentum-part1 for
+        # the measured comparison). x/y are the two endpoints of the top
+        # edge of the shaded region; label_xy places the bold impulse
+        # value text (replaces matplotlib's separate legend, simpler to
+        # read at a glance).
+        _pts = [{"x": float(_x), "y": float(_y)} for _x, _y in zip(x, y)]
+        _x_enc = {"field": "x", "type": "quantitative", "title": xlabel,
+                   "scale": {"domain": list(xlim)}}
+        _y_enc = {"field": "y", "type": "quantitative", "title": ylabel,
+                   "scale": {"domain": list(ylim)}}
+        _layers = [
+            {"data": {"values": _pts},
+             "mark": {"type": "area", "color": color, "opacity": 0.4},
+             "encoding": {"x": _x_enc, "y": _y_enc}},
+            {"data": {"values": _pts},
+             "mark": {"type": "line", "color": color, "strokeWidth": 2},
+             "encoding": {"x": _x_enc, "y": _y_enc}},
+            # Dashed guide line from the top-right corner down to the x-axis.
+            {"data": {"values": [{"x": x[-1], "y": 0}, {"x": x[-1], "y": y[-1]}]},
+             "mark": {"type": "line", "color": color, "strokeWidth": 1, "strokeDash": [4, 4]},
+             "encoding": {"x": {"field": "x", "type": "quantitative"}, "y": {"field": "y", "type": "quantitative"}}},
+            {"data": {"values": [{"y": 0}]},
+             "mark": {"type": "rule", "color": "black", "strokeWidth": 0.8},
+             "encoding": {"y": {"field": "y", "type": "quantitative"}}},
+            {"data": {"values": [{"x": 0}]},
+             "mark": {"type": "rule", "color": "black", "strokeWidth": 0.8},
+             "encoding": {"x": {"field": "x", "type": "quantitative"}}},
+            {"data": {"values": [{"x": label_xy[0], "y": label_xy[1]}]},
+             "mark": {"type": "text", "fontWeight": "bold", "fontSize": 11, "lineBreak": "\n"},
+             "encoding": {
+                "x": {"field": "x", "type": "quantitative"},
+                "y": {"field": "y", "type": "quantitative"},
+                "text": {"value": label},
+             }},
+        ]
+        return {
+            "data": {"values": _pts},
+            "layer": _layers,
+            "width": width,
+            "height": height,
+            "title": title,
+        }
+
+    return (area_chart,)
 
 
 @app.cell(hide_code=True)
@@ -128,10 +181,10 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     force_slider = mo.ui.slider(
-        start=-100, stop=100, step=1, value=40, label="net force, $F_{net}$ (N)"
+        start=-100, stop=100, step=1, value=40, label="net force, $F_{net}$ (N)", debounce=True
     )
     time_slider = mo.ui.slider(
-        start=0.1, stop=5, step=0.1, value=0.5, label="time interval, $\\Delta t$ (s)"
+        start=0.1, stop=5, step=0.1, value=0.5, label="time interval, $\\Delta t$ (s)", debounce=True
     )
     mo.hstack([force_slider, time_slider], justify="start", gap=2)
     return force_slider, time_slider
@@ -148,37 +201,23 @@ def _(force_slider, mo, time_slider):
 
 
 @app.cell(hide_code=True)
-def _(force_slider, plt, time_slider):
+def _(alt, area_chart, force_slider, mo, time_slider):
     _F = force_slider.value
     _t = time_slider.value
     _area = _F * _t
 
-    fig2, ax2 = plt.subplots(figsize=(6, 4))
-    ax2.fill_between(
-        [0, _t], [_F, _F], color="tab:orange", alpha=0.4, label="area = $\\Delta p$"
+    fig2 = alt.Chart.from_dict(
+        area_chart(
+            [0, _t], [_F, _F], "#ff7f0e",
+            xlim=(0, 5.2), ylim=(-110, 110),
+            xlabel="time, t (s)", ylabel="net force, F (N)",
+            title="Constant force: impulse = area of the rectangle",
+            label=f"area = {_F} × {_t:.1f}\n= {_area:,.1f} kg m/s",
+            label_xy=(_t / 2, _F / 2),
+        ),
+        validate=False,
     )
-    ax2.plot([0, _t], [_F, _F], color="tab:orange", linewidth=2)
-    # Dashed guide lines from the top corner to each axis.
-    ax2.plot([_t, _t], [0, _F], color="tab:orange", linestyle="--", linewidth=1)
-    ax2.axhline(0, color="black", linewidth=0.8)
-    ax2.axvline(0, color="black", linewidth=0.8)
-    # Label the area right in the middle of the shaded rectangle.
-    ax2.annotate(
-        f"area = {_F} × {_t:.1f}\n= {_area:,.1f} kg m/s",
-        xy=(_t / 2, _F / 2),
-        ha="center",
-        va="center",
-        fontweight="bold",
-        fontsize=10,
-    )
-    ax2.set_xlim(0, 5.2)
-    ax2.set_ylim(-110, 110)
-    ax2.set_xlabel("time, t (s)")
-    ax2.set_ylabel("net force, F (N)")
-    ax2.set_title("Constant force: impulse = area of the rectangle")
-    ax2.grid(alpha=0.3)
-    ax2.legend(loc="upper right")
-    fig2
+    mo.center(fig2)
     return
 
 
@@ -299,13 +338,13 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     f_start_slider = mo.ui.slider(
-        start=0, stop=100, step=5, value=0, label="start force, $F_1$ (N)"
+        start=0, stop=100, step=5, value=0, label="start force, $F_1$ (N)", debounce=True
     )
     f_end_slider = mo.ui.slider(
-        start=0, stop=100, step=5, value=60, label="end force, $F_2$ (N)"
+        start=0, stop=100, step=5, value=60, label="end force, $F_2$ (N)", debounce=True
     )
     dt_slider = mo.ui.slider(
-        start=0.5, stop=5, step=0.5, value=4, label="time interval, $\\Delta t$ (s)"
+        start=0.5, stop=5, step=0.5, value=4, label="time interval, $\\Delta t$ (s)", debounce=True
     )
     mo.hstack([f_start_slider, f_end_slider, dt_slider], justify="start", gap=2)
     return dt_slider, f_end_slider, f_start_slider
@@ -331,34 +370,24 @@ def _(dt_slider, f_end_slider, f_start_slider, mo):
 
 
 @app.cell(hide_code=True)
-def _(dt_slider, f_end_slider, f_start_slider, plt):
+def _(alt, area_chart, dt_slider, f_end_slider, f_start_slider, mo):
     _f1 = f_start_slider.value
     _f2 = f_end_slider.value
     _dt = dt_slider.value
     _area = 0.5 * (_f1 + _f2) * _dt
 
-    fig_area, ax_a = plt.subplots(figsize=(6, 4))
-    ax_a.fill_between([0, _dt], [_f1, _f2], color="tab:purple", alpha=0.35, label="area = $\\Delta p$")
-    ax_a.plot([0, _dt], [_f1, _f2], color="tab:purple", linewidth=2)
-    ax_a.plot([_dt, _dt], [0, _f2], color="tab:purple", linestyle="--", linewidth=1)
-    ax_a.axhline(0, color="black", linewidth=0.8)
-    ax_a.axvline(0, color="black", linewidth=0.8)
-    ax_a.annotate(
-        f"impulse = {_area:,.1f} kg m/s",
-        xy=(_dt / 2, max(_f1 + _f2, 10) / 4),
-        ha="center",
-        va="center",
-        fontweight="bold",
-        fontsize=10,
+    fig_area = alt.Chart.from_dict(
+        area_chart(
+            [0, _dt], [_f1, _f2], "#9467bd",
+            xlim=(0, 5.2), ylim=(0, 110),
+            xlabel="time, t (s)", ylabel="net force, F (N)",
+            title="Changing force: impulse = area under the straight line",
+            label=f"impulse = {_area:,.1f} kg m/s",
+            label_xy=(_dt / 2, max(_f1 + _f2, 10) / 4),
+        ),
+        validate=False,
     )
-    ax_a.set_xlim(0, 5.2)
-    ax_a.set_ylim(0, 110)
-    ax_a.set_xlabel("time, t (s)")
-    ax_a.set_ylabel("net force, F (N)")
-    ax_a.set_title("Changing force: impulse = area under the straight line")
-    ax_a.grid(alpha=0.3)
-    ax_a.legend(loc="upper left")
-    fig_area
+    mo.center(fig_area)
     return
 
 

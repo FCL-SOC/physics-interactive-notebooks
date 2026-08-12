@@ -7,10 +7,43 @@ app = marimo.App(width="medium", layout_file="layouts/momentum-part4-teacher.sli
 @app.cell(hide_code=True)
 def _():
     import marimo as mo
-    import numpy as np
-    import matplotlib.pyplot as plt
+    import altair as alt
 
-    return mo, plt
+    return alt, mo
+
+
+@app.cell(hide_code=True)
+def _(alt):
+    def bar_group(labels, values, colors, ylim, ylabel, title):
+        # Plain Vega-Lite spec dict, not chained Altair calls — see
+        # momentum-part1 for why (chained calls are much slower to rebuild
+        # on every slider move). One bar chart with N labelled bars.
+        _pts = [{"label": _l, "value": _v} for _l, _v in zip(labels, values)]
+        return {
+            "data": {"values": _pts},
+            "layer": [
+                {
+                    "mark": {"type": "bar", "stroke": "black", "strokeWidth": 0.6},
+                    "encoding": {
+                        "x": {"field": "label", "type": "nominal", "title": None, "sort": None},
+                        "y": {"field": "value", "type": "quantitative", "title": ylabel,
+                              "scale": {"domain": [-ylim, ylim]}},
+                        "color": {"field": "label", "type": "nominal",
+                                  "scale": {"domain": labels, "range": colors}, "legend": None},
+                    },
+                },
+                {
+                    "data": {"values": [{"y": 0}]},
+                    "mark": {"type": "rule", "color": "black", "strokeWidth": 0.8},
+                    "encoding": {"y": {"field": "y", "type": "quantitative"}},
+                },
+            ],
+            "width": 260,
+            "height": 260,
+            "title": title,
+        }
+
+    return (bar_group,)
 
 
 @app.cell(hide_code=True)
@@ -119,10 +152,10 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    m1_slider = mo.ui.slider(start=1, stop=2000, step=10, value=1000, label="$m_1$ (kg)")
-    u1_slider = mo.ui.slider(start=-20, stop=20, step=0.5, value=10, label="$u_1$ (m/s)")
-    m2_slider = mo.ui.slider(start=1, stop=2000, step=10, value=1000, label="$m_2$ (kg)")
-    u2_slider = mo.ui.slider(start=-20, stop=20, step=0.5, value=0, label="$u_2$ (m/s)")
+    m1_slider = mo.ui.slider(start=1, stop=2000, step=10, value=1000, label="$m_1$ (kg)", debounce=True)
+    u1_slider = mo.ui.slider(start=-20, stop=20, step=0.5, value=10, label="$u_1$ (m/s)", debounce=True)
+    m2_slider = mo.ui.slider(start=1, stop=2000, step=10, value=1000, label="$m_2$ (kg)", debounce=True)
+    u2_slider = mo.ui.slider(start=-20, stop=20, step=0.5, value=0, label="$u_2$ (m/s)", debounce=True)
     collision_type = mo.ui.radio(
         options=["Perfectly inelastic (stick together)", "Elastic (bounce apart)"],
         value="Perfectly inelastic (stick together)",
@@ -166,8 +199,8 @@ def _(collision_type, m1_slider, m2_slider, mo, u1_slider, u2_slider):
     return
 
 
-@app.cell
-def _(collision_type, m1_slider, m2_slider, plt, u1_slider, u2_slider):
+@app.cell(hide_code=True)
+def _(alt, bar_group, collision_type, m1_slider, m2_slider, mo, u1_slider, u2_slider):
     _m1, _m2 = m1_slider.value, m2_slider.value
     _u1, _u2 = u1_slider.value, u2_slider.value
     _p_before = _m1 * _u1 + _m2 * _u2
@@ -186,53 +219,34 @@ def _(collision_type, m1_slider, m2_slider, plt, u1_slider, u2_slider):
     _p2_after = _m2 * _v2
     _pt_after = _p1_after + _p2_after
 
-    fig4, ([ax4a, ax4b], [ax4c, ax4d]) = plt.subplots(2, 2, figsize=(8, 6))
-
-    _labels = ['object 1', 'object 2']
-    _labels1 = ['object 1', 'object 2', 'total']
-
-    ax4a.bar(_labels, [_u1, _u2], color=["tab:blue", "tab:red"])
-    ax4a.axhline(0, color="black", linewidth=0.8)
-    ax4a.set_title("Velocities Before")
-    ax4a.set_ylabel("Velocity (m/s)")
-    ax4a.grid(which="major", alpha=0.6, axis="y")
-    ax4a.grid(which="minor", alpha=0.6, axis="y")
-    ax4a.minorticks_on()
-
-    ax4b.bar(_labels, [_v1, _v2], color=["tab:blue", "tab:red"])
-    ax4b.axhline(0, color="black", linewidth=0.8)
-    ax4b.set_title("Velocities After")
-    ax4b.set_ylabel("Velocity (m/s)")
-    ax4b.grid(which="major", alpha=0.6, axis="y")
-    ax4b.grid(which="minor", alpha=0.6, axis="y")
-    ax4b.minorticks_on()
-
-    ax4c.bar(_labels1, [_p1_before, _p2_before, _pt_before], color=["tab:blue", "tab:red", "tab:orange"])
-    ax4c.axhline(0, color="black", linewidth=0.8)
-    ax4c.set_title("Momentum Before")
-    ax4c.set_ylabel("Momentum (kg·m/s)")
-    ax4c.grid(which="major", alpha=0.6, axis="y")
-    ax4c.grid(which="minor", alpha=0.6, axis="y")
-    ax4c.minorticks_on()
-
-    ax4d.bar(_labels1, [_p1_after, _p2_after, _pt_after], color=["tab:blue", "tab:red", "tab:orange"])
-    ax4d.axhline(0, color="black", linewidth=0.8)
-    ax4d.set_title("Momentum After")
-    ax4d.set_ylabel("Momentum (kg·m/s)")
-    ax4d.grid(which="major", alpha=0.6, axis="y")
-    ax4d.grid(which="minor", alpha=0.6, axis="y")
-    ax4d.minorticks_on()
-
+    _labels = ["object 1", "object 2"]
+    _labels1 = ["object 1", "object 2", "total"]
+    _colors = ["#1f77b4", "#d62728"]
+    _colors1 = ["#1f77b4", "#d62728", "#ff7f0e"]
     _ylim_v = 22
-    ax4a.set_ylim(-_ylim_v, _ylim_v)
-    ax4b.set_ylim(-_ylim_v, _ylim_v)
-
     _ylim_p = 42000
-    ax4c.set_ylim(-_ylim_p, _ylim_p)
-    ax4d.set_ylim(-_ylim_p, _ylim_p)
 
-    fig4.tight_layout()
-    fig4
+    _panel_a = bar_group(_labels, [_u1, _u2], _colors, _ylim_v, "Velocity (m/s)", "Velocities Before")
+    _panel_b = bar_group(_labels, [_v1, _v2], _colors, _ylim_v, "Velocity (m/s)", "Velocities After")
+    _panel_c = bar_group(_labels1, [_p1_before, _p2_before, _pt_before], _colors1, _ylim_p, "Momentum (kg·m/s)", "Momentum Before")
+    _panel_d = bar_group(_labels1, [_p1_after, _p2_after, _pt_after], _colors1, _ylim_p, "Momentum (kg·m/s)", "Momentum After")
+
+    fig4 = alt.Chart.from_dict(
+        {
+            "vconcat": [
+                {"hconcat": [_panel_a, _panel_b]},
+                {"hconcat": [_panel_c, _panel_d]},
+            ],
+            # Without this, Vega-Lite tries to share one colour scale
+            # across all 4 panels — since panel A only has 2 categories
+            # (object 1/2) but panel C has 3 (+ total), the shared scale
+            # silently mis-colours the "total" bar. Each panel needs its
+            # own colour mapping.
+            "resolve": {"scale": {"color": "independent"}},
+        },
+        validate=False,
+    )
+    mo.center(fig4)
     return
 
 

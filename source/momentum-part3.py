@@ -8,9 +8,9 @@ app = marimo.App(width="medium")
 def _():
     import marimo as mo
     import numpy as np
-    import matplotlib.pyplot as plt
+    import altair as alt
 
-    return mo, np, plt
+    return alt, mo, np
 
 
 @app.cell(hide_code=True)
@@ -118,10 +118,10 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    dummy_mass = mo.ui.slider(start=30, stop=120, step=1, value=60, label="mass (kg)")
-    dummy_dv = mo.ui.slider(start=1, stop=30, step=1, value=20, label="$\\Delta v$ (m/s)")
+    dummy_mass = mo.ui.slider(start=30, stop=120, step=1, value=60, label="mass (kg)", debounce=True)
+    dummy_dv = mo.ui.slider(start=1, stop=30, step=1, value=20, label="$\\Delta v$ (m/s)", debounce=True)
     collision_time = mo.ui.slider(
-        start=0.02, stop=1.0, step=0.02, value=0.1, label="collision time, $\\Delta t$ (s)"
+        start=0.02, stop=1.0, step=0.02, value=0.1, label="collision time, $\\Delta t$ (s)", debounce=True
     )
     mo.hstack([dummy_mass, dummy_dv, collision_time], justify="start", gap=2)
     return collision_time, dummy_dv, dummy_mass
@@ -138,23 +138,37 @@ def _(collision_time, dummy_dv, dummy_mass, mo):
 
 
 @app.cell(hide_code=True)
-def _(collision_time, dummy_dv, dummy_mass, np, plt):
+def _(alt, collision_time, dummy_dv, dummy_mass, mo, np):
     _t_range = np.linspace(0.02, 1.0, 200)
     _F_range = dummy_mass.value * dummy_dv.value / _t_range
+    _F_point = dummy_mass.value * dummy_dv.value / collision_time.value
 
-    fig3, ax3 = plt.subplots(figsize=(6, 4))
-    ax3.plot(_t_range, _F_range, color="tab:green")
-    ax3.set_xlabel("collision time, $\\Delta t$ (s)")
-    ax3.set_ylim(0, 175000)
-    ax3.set_ylabel("force experienced, F (N)")
-    ax3.set_title("Longer collision time → smaller force, for fixed $m\\Delta v$")
-    ax3.scatter(
-        [collision_time.value],
-        [dummy_mass.value * dummy_dv.value / collision_time.value],
-        color="tab:red",
-        zorder=5,
+    # Plain Vega-Lite spec dict, not chained Altair calls — see
+    # momentum-part1 for why (chained calls are much slower to rebuild
+    # on every slider move).
+    _pts = [{"x": float(_t), "y": float(_f)} for _t, _f in zip(_t_range, _F_range)]
+    _x_enc = {"field": "x", "type": "quantitative", "title": "collision time, Δt (s)",
+               "scale": {"domain": [0.02, 1.0]}, "axis": {"grid": False}}
+    _y_enc = {"field": "y", "type": "quantitative", "title": "force experienced, F (N)",
+               "scale": {"domain": [0, 175000]}, "axis": {"grid": False}}
+    fig3 = alt.Chart.from_dict(
+        {
+            "data": {"values": _pts},
+            "layer": [
+                {"mark": {"type": "line", "color": "#2ca02c", "strokeWidth": 2},
+                 "encoding": {"x": _x_enc, "y": _y_enc}},
+                {"data": {"values": [{"x": collision_time.value, "y": _F_point}]},
+                 "mark": {"type": "point", "color": "#d62728", "size": 70, "filled": True},
+                 "encoding": {"x": {"field": "x", "type": "quantitative"},
+                              "y": {"field": "y", "type": "quantitative"}}},
+            ],
+            "width": 480,
+            "height": 320,
+            "title": "Longer collision time → smaller force, for fixed mΔv",
+        },
+        validate=False,
     )
-    fig3
+    mo.center(fig3)
     return
 
 
