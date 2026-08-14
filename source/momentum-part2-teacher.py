@@ -1,6 +1,15 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "marimo",
+#     "altair",
+#     "marimo-learn==0.14.0",
+# ]
+# ///
+
 import marimo
 
-__generated_with = "0.23.14"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium", layout_file="layouts/momentum-part2-teacher.slides.json")
 
 
@@ -8,62 +17,72 @@ app = marimo.App(width="medium", layout_file="layouts/momentum-part2-teacher.sli
 def _():
     import marimo as mo
     import altair as alt
+    from marimo_learn import (
+        NumericEntryWidget,
+        PredictThenCheckWidget,
+        MatchingWidget,
+        ConceptMapWidget,
+    )
 
-    return alt, mo
+    return (
+        ConceptMapWidget,
+        MatchingWidget,
+        NumericEntryWidget,
+        PredictThenCheckWidget,
+        alt,
+        mo,
+    )
 
 
-@app.cell(hide_code=True)
-def _(alt):
-    def area_chart(
-        x, y, color, xlim, ylim, xlabel, ylabel, title, label, label_xy,
-        width=480, height=320,
-    ):
-        # Shared "area under a force-time line" chart builder: a plain
-        # Vega-Lite spec dict (not chained Altair calls, which are much
-        # slower to rebuild on every slider move — see momentum-part1 for
-        # the measured comparison). x/y are the two endpoints of the top
-        # edge of the shaded region; label_xy places the bold impulse
-        # value text (replaces matplotlib's separate legend, simpler to
-        # read at a glance).
-        _pts = [{"x": float(_x), "y": float(_y)} for _x, _y in zip(x, y)]
-        _x_enc = {"field": "x", "type": "quantitative", "title": xlabel,
-                   "scale": {"domain": list(xlim)}}
-        _y_enc = {"field": "y", "type": "quantitative", "title": ylabel,
-                   "scale": {"domain": list(ylim)}}
-        _layers = [
-            {"data": {"values": _pts},
-             "mark": {"type": "area", "color": color, "opacity": 0.4},
-             "encoding": {"x": _x_enc, "y": _y_enc}},
-            {"data": {"values": _pts},
-             "mark": {"type": "line", "color": color, "strokeWidth": 2},
-             "encoding": {"x": _x_enc, "y": _y_enc}},
-            # Dashed guide line from the top-right corner down to the x-axis.
-            {"data": {"values": [{"x": x[-1], "y": 0}, {"x": x[-1], "y": y[-1]}]},
-             "mark": {"type": "line", "color": color, "strokeWidth": 1, "strokeDash": [4, 4]},
-             "encoding": {"x": {"field": "x", "type": "quantitative"}, "y": {"field": "y", "type": "quantitative"}}},
-            {"data": {"values": [{"y": 0}]},
-             "mark": {"type": "rule", "color": "black", "strokeWidth": 0.8},
-             "encoding": {"y": {"field": "y", "type": "quantitative"}}},
-            {"data": {"values": [{"x": 0}]},
-             "mark": {"type": "rule", "color": "black", "strokeWidth": 0.8},
-             "encoding": {"x": {"field": "x", "type": "quantitative"}}},
-            {"data": {"values": [{"x": label_xy[0], "y": label_xy[1]}]},
-             "mark": {"type": "text", "fontWeight": "bold", "fontSize": 11, "lineBreak": "\n"},
-             "encoding": {
-                "x": {"field": "x", "type": "quantitative"},
-                "y": {"field": "y", "type": "quantitative"},
-                "text": {"value": label},
-             }},
-        ]
-        return {
-            "data": {"values": _pts},
-            "layer": _layers,
-            "width": width,
-            "height": height,
-            "title": title,
-        }
-
-    return (area_chart,)
+@app.function(hide_code=True)
+def area_chart(
+    x, y, color, xlim, ylim, xlabel, ylabel, title, label, label_xy,
+    width=480, height=320,
+):
+    # Shared "area under a force-time line" chart builder: a plain
+    # Vega-Lite spec dict (not chained Altair calls, which are much
+    # slower to rebuild on every slider move — see momentum-part1 for
+    # the measured comparison). x/y are the two endpoints of the top
+    # edge of the shaded region; label_xy places the bold impulse
+    # value text (replaces matplotlib's separate legend, simpler to
+    # read at a glance).
+    _pts = [{"x": float(_x), "y": float(_y)} for _x, _y in zip(x, y)]
+    _x_enc = {"field": "x", "type": "quantitative", "title": xlabel,
+               "scale": {"domain": list(xlim)}}
+    _y_enc = {"field": "y", "type": "quantitative", "title": ylabel,
+               "scale": {"domain": list(ylim)}}
+    _layers = [
+        {"data": {"values": _pts},
+         "mark": {"type": "area", "color": color, "opacity": 0.4},
+         "encoding": {"x": _x_enc, "y": _y_enc}},
+        {"data": {"values": _pts},
+         "mark": {"type": "line", "color": color, "strokeWidth": 2},
+         "encoding": {"x": _x_enc, "y": _y_enc}},
+        # Dashed guide line from the top-right corner down to the x-axis.
+        {"data": {"values": [{"x": x[-1], "y": 0}, {"x": x[-1], "y": y[-1]}]},
+         "mark": {"type": "line", "color": color, "strokeWidth": 1, "strokeDash": [4, 4]},
+         "encoding": {"x": {"field": "x", "type": "quantitative"}, "y": {"field": "y", "type": "quantitative"}}},
+        {"data": {"values": [{"y": 0}]},
+         "mark": {"type": "rule", "color": "black", "strokeWidth": 0.8},
+         "encoding": {"y": {"field": "y", "type": "quantitative"}}},
+        {"data": {"values": [{"x": 0}]},
+         "mark": {"type": "rule", "color": "black", "strokeWidth": 0.8},
+         "encoding": {"x": {"field": "x", "type": "quantitative"}}},
+        {"data": {"values": [{"x": label_xy[0], "y": label_xy[1]}]},
+         "mark": {"type": "text", "fontWeight": "bold", "fontSize": 11, "lineBreak": "\n"},
+         "encoding": {
+            "x": {"field": "x", "type": "quantitative"},
+            "y": {"field": "y", "type": "quantitative"},
+            "text": {"value": label},
+         }},
+    ]
+    return {
+        "data": {"values": _pts},
+        "layer": _layers,
+        "width": width,
+        "height": height,
+        "title": title,
+    }
 
 
 @app.cell(hide_code=True)
@@ -201,7 +220,7 @@ def _(force_slider, mo, time_slider):
 
 
 @app.cell(hide_code=True)
-def _(alt, area_chart, force_slider, mo, time_slider):
+def _(alt, force_slider, mo, time_slider):
     _F = force_slider.value
     _t = time_slider.value
     _area = _F * _t
@@ -260,48 +279,23 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
-    **2. A net force of 15 N acts on an object for 3 seconds. Calculate the
-    change in momentum.**
+    mo.md("""
+    **2.**
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    q1_answer = mo.ui.number(start=0, stop=200, step=0.1, label="Your answer (kg m/s):")
-    q1_answer
-    return (q1_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q1_answer):
-    _correct = 15 * 3
-    if q1_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q1_answer.value - _correct) < 0.5:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Try again, $\\Delta p = F_{net}\\Delta t = 15 \\times 3$.")
-    _fb
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.accordion(
-        {
-            "Solution": mo.md(
-                """
-                $\\Delta p = F_{net}\\,\\Delta t$
-
-                $F_{net} = 15, \\quad \\Delta t = 3$
-
-                $\\Delta p = 15 \\times 3 = 45 \\text{ kg m s}^{-1}$
-                """
-            )
-        }
+def _(NumericEntryWidget, mo):
+    q1_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="A net force of 15 N acts on an object for 3 seconds. Calculate the change in momentum, in kg m/s.",
+            correct_answer=15 * 3,
+            tolerance=0.5,
+            explanation="Δp = F_net × Δt = 15 × 3 = 45 kg m s⁻¹",
+        )
     )
+    q1_check
     return
 
 
@@ -370,7 +364,7 @@ def _(dt_slider, f_end_slider, f_start_slider, mo):
 
 
 @app.cell(hide_code=True)
-def _(alt, area_chart, dt_slider, f_end_slider, f_start_slider, mo):
+def _(alt, dt_slider, f_end_slider, f_start_slider, mo):
     _f1 = f_start_slider.value
     _f2 = f_end_slider.value
     _dt = dt_slider.value
@@ -393,129 +387,75 @@ def _(alt, area_chart, dt_slider, f_end_slider, f_start_slider, mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
-    **Read the area.** A net force ramps up **linearly from 0 N to 50 N over
-    3.0 s**. The area under this graph is a triangle. Calculate the impulse.
-
-    *Hint: area of a triangle $= \tfrac{1}{2} \times \text{base} \times \text{height}$.*
+    mo.md("""
+    **Read the area.**
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    q_area_answer = mo.ui.number(start=0, stop=500, step=0.1, label="Your answer (kg m/s):")
-    q_area_answer
-    return (q_area_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q_area_answer):
-    _correct = 0.5 * 3.0 * 50
-    if q_area_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q_area_answer.value - _correct) < 0.5:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Not quite, the area of the triangle is $\\tfrac{1}{2} \\times 3.0 \\times 50$.")
-    _fb
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.accordion(
-        {
-            "Solution": mo.md(
-                """
-                The graph is a triangle with base $\\Delta t = 3.0$ s and height
-                $F = 50$ N.
-
-                $\\Delta p = \\text{area} = \\tfrac{1}{2} \\times \\text{base}
-                \\times \\text{height} = \\tfrac{1}{2} \\times 3.0 \\times 50
-                = 75 \\text{ kg m s}^{-1}$
-                """
-            )
-        }
+def _(NumericEntryWidget, mo):
+    q_area_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question=(
+                "A net force ramps up linearly from 0 N to 50 N over 3.0 s. "
+                "The area under this graph is a triangle. Calculate the "
+                "impulse, in kg m/s. (Hint: area of a triangle = ½ × base × "
+                "height.)"
+            ),
+            correct_answer=0.5 * 3.0 * 50,
+            tolerance=0.5,
+            explanation=(
+                "The graph is a triangle with base Δt = 3.0 s and height "
+                "F = 50 N. Δp = area = ½ × base × height = ½ × 3.0 × 50 "
+                "= 75 kg m s⁻¹"
+            ),
+        )
     )
+    q_area_check
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
+    mo.md("""
     ## Quick practice
-
-    **Q1. A net force of 8.0 N acts on a box for 2.5 s. Calculate the impulse.**
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    q2_answer = mo.ui.number(start=0, stop=200, step=0.1, label="Your answer (kg m/s):")
-    q2_answer
-    return (q2_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q2_answer):
-    _correct = 8.0 * 2.5
-    if q2_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q2_answer.value - _correct) < 0.2:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Try again, $\\Delta p = 8.0 \\times 2.5$.")
-    _fb
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    **Q2. A 30 N force pushes a crate east while 12 N of friction acts west. The
-    forces act for 4.0 s. Calculate the change in momentum.**
-
-    *Hint: find the net force first.*
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    q3_answer = mo.ui.number(start=0, stop=300, step=0.1, label="Your answer (kg m/s):")
-    q3_answer
-    return (q3_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q3_answer):
-    _correct = (30 - 12) * 4.0
-    if q3_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q3_answer.value - _correct) < 0.5:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Not quite, the net force is $30 - 12 = 18$ N.")
-    _fb
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.accordion(
-        {
-            "Solution": mo.md(
-                """
-                $F_{net} = 30 - 12 = 18 \\text{ N}$
-
-                $\\Delta p = F_{net}\\,\\Delta t = 18 \\times 4.0 = 72
-                \\text{ kg m s}^{-1}$
-                """
-            )
-        }
+def _(NumericEntryWidget, mo):
+    q2_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="Q1. A net force of 8.0 N acts on a box for 2.5 s. Calculate the impulse, in kg m/s.",
+            correct_answer=8.0 * 2.5,
+            tolerance=0.2,
+            explanation="Δp = F_net × Δt = 8.0 × 2.5 = 20 kg m s⁻¹",
+        )
     )
+    q2_check
+    return
+
+
+@app.cell(hide_code=True)
+def _(NumericEntryWidget, mo):
+    q3_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question=(
+                "Q2. A 30 N force pushes a crate east while 12 N of friction "
+                "acts west. The forces act for 4.0 s. Calculate the change "
+                "in momentum, in kg m/s. (Hint: find the net force first.)"
+            ),
+            correct_answer=(30 - 12) * 4.0,
+            tolerance=0.5,
+            explanation=(
+                "F_net = 30 − 12 = 18 N. Δp = F_net × Δt = 18 × 4.0 "
+                "= 72 kg m s⁻¹"
+            ),
+        )
+    )
+    q3_check
     return
 
 
@@ -524,128 +464,130 @@ def _(mo):
     mo.md(r"""
     ------
 
-    ## Predict, observe, explain
-
-    For each task: **predict** first (before touching anything), then **observe**
-    using the sliders further up the page, then **explain** what you saw. Scroll
-    back up to the graphs to test each prediction.
-
-    ### Task 1 — doubling the time
-
-    Using the **changing-force** graph, set $F_1 = 20$ N, $F_2 = 60$ N and
-    $\Delta t = 2$ s. Now you are going to double the time to $\Delta t = 4$ s.
-
-    **Predict:** what will happen to the impulse (the shaded area)?
+    ## Match it: quantity and unit
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    poe1_predict = mo.ui.radio(
-        options=[
-            "It stays the same",
-            "It doubles",
-            "It halves",
-            "It goes up, but not exactly double",
-        ],
-        label="My prediction:",
+def _(MatchingWidget, mo):
+    impulse_unit_match = mo.ui.anywidget(
+        MatchingWidget(
+            question="Match each quantity to its SI unit:",
+            left=["Force, F", "Impulse, J", "Momentum, p"],
+            right=["N", "N·s", "kg m s⁻¹"],
+            correct_matches={0: 0, 1: 1, 2: 2},
+        )
     )
-    poe1_predict
-    return (poe1_predict,)
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    poe1_explain = mo.ui.text_area(
-        placeholder="Now move the slider to Δt = 4 s. What happened, and why?",
-        label="Observe, then explain:",
-        full_width=True,
-    )
-    poe1_explain
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.accordion(
-        {
-            "Reveal answer": mo.md(
-                """
-                **It doubles.** The impulse is the area
-                $\\tfrac{1}{2}(F_1 + F_2)\\,\\Delta t$. The forces are unchanged,
-                so the *height* of the shape is the same, but doubling
-                $\\Delta t$ doubles the *width*, and therefore doubles the area.
-                At $\\Delta t = 2$ s the impulse is
-                $\\tfrac{1}{2}(20 + 60)(2) = 80$ kg m/s; at $\\Delta t = 4$ s it
-                is $\\tfrac{1}{2}(20 + 60)(4) = 160$ kg m/s.
-                """
-            )
-        }
-    )
+    impulse_unit_match
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### Task 2 — same area, different shape
+    ## Concept map: force, time, and momentum
 
-    Compare two ways of delivering an impulse over the **same** 3.0 s:
-
-    - **A:** a *constant* force of 40 N (a rectangle), and
-    - **B:** a force ramping *linearly from 0 N up to 80 N* (a triangle).
-
-    **Predict:** which delivers the larger impulse, A, B, or are they equal?
+    $\Delta p = F_{net}\Delta t$ links four quantities together. Map how they
+    relate.
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    poe2_predict = mo.ui.radio(
-        options=[
-            "A (the constant 40 N force)",
-            "B (the ramp up to 80 N)",
-            "They are equal",
-        ],
-        label="My prediction:",
+def _(ConceptMapWidget, mo):
+    impulse_concept_map = mo.ui.anywidget(
+        ConceptMapWidget(
+            question="Map the relationships between these quantities:",
+            concepts=["Net force (F)", "Time interval (Δt)", "Impulse (J)", "Change in momentum (Δp)"],
+            terms=["× Δt →", "× F →", "is equal to"],
+            correct_edges=[
+                {"from": "Net force (F)", "to": "Impulse (J)", "label": "× Δt →"},
+                {"from": "Time interval (Δt)", "to": "Impulse (J)", "label": "× F →"},
+                {"from": "Impulse (J)", "to": "Change in momentum (Δp)", "label": "is equal to"},
+            ],
+        )
     )
-    poe2_predict
-    return (poe2_predict,)
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    poe2_explain = mo.ui.text_area(
-        placeholder="Use the two graphs to find each area, then explain what you found.",
-        label="Observe, then explain:",
-        full_width=True,
-    )
-    poe2_explain
+    impulse_concept_map
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.accordion(
-        {
-            "Reveal answer": mo.md(
-                """
-                **They are equal.** Both areas work out to 120 kg m/s:
+    mo.md(r"""
+    ------
 
-                - A (rectangle): $\\text{area} = 40 \\times 3.0 = 120$ kg m/s
-                - B (triangle): $\\text{area} = \\tfrac{1}{2} \\times 3.0
-                  \\times 80 = 120$ kg m/s
+    ## Predict, then check
 
-                A bigger *peak* force does not automatically mean a bigger
-                impulse, what matters is the **area** under the graph. Because
-                B only reaches 80 N at the very end, it spends most of the time
-                below 40 N, and the two areas end up the same.
-                """
-            )
-        }
+    Try the sliders further up the page first if you like, then predict.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(PredictThenCheckWidget, mo):
+    poe1_check = mo.ui.anywidget(
+        PredictThenCheckWidget(
+            question=(
+                "Using the changing-force graph, set F₁ = 20 N, F₂ = 60 N "
+                "and Δt = 2 s (impulse = 80 kg·m/s). If you double the time "
+                "to Δt = 4 s, what happens to the impulse?"
+            ),
+            code="Δp = ½(F₁ + F₂) × Δt\n½(20 + 60) × 2 = 80 kg·m/s\n½(20 + 60) × 4 = ?",
+            output="½(20 + 60) × 4 = 160 kg·m/s",
+            options=[
+                "It stays the same",
+                "It doubles",
+                "It halves",
+                "It goes up, but not exactly double",
+            ],
+            correct_answer=1,
+            explanations=[
+                "Wrong: the impulse is an area, and doubling the width of that area does change it.",
+                "Correct: the forces (height) are unchanged, so doubling Δt (width) doubles the area — from 80 to 160 kg·m/s.",
+                "Wrong: halving would happen if Δt were halved, not doubled.",
+                "Wrong: because the forces stay the same, the area scales exactly with Δt — it does double.",
+            ],
+        )
     )
+    poe1_check
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### Same area, different shape
+
+    Compare two ways of delivering an impulse over the **same** 3.0 s:
+
+    - **A:** a *constant* force of 40 N (a rectangle), and
+    - **B:** a force ramping *linearly from 0 N up to 80 N* (a triangle).
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(PredictThenCheckWidget, mo):
+    poe2_check = mo.ui.anywidget(
+        PredictThenCheckWidget(
+            question="Which delivers the larger impulse over 3.0 s: A (constant 40 N), B (ramp 0→80 N), or are they equal?",
+            code="A (rectangle): 40 × 3.0 = ?\nB (triangle): ½ × 3.0 × 80 = ?",
+            output="A: 120 kg·m/s   B: 120 kg·m/s",
+            options=[
+                "A (the constant 40 N force)",
+                "B (the ramp up to 80 N)",
+                "They are equal",
+            ],
+            correct_answer=2,
+            explanations=[
+                "Wrong: A's area (rectangle) works out to 40 × 3.0 = 120 kg·m/s, the same as B.",
+                "Wrong: a bigger peak force (80 N) doesn't mean a bigger impulse — B spends most of the interval below 40 N.",
+                "Correct: both areas equal 120 kg·m/s. What matters is the area under the graph, not the peak force.",
+            ],
+        )
+    )
+    poe2_check
     return
 
 

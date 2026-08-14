@@ -1,6 +1,16 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "marimo",
+#     "altair",
+#     "numpy",
+#     "marimo-learn==0.14.0",
+# ]
+# ///
+
 import marimo
 
-__generated_with = "0.23.14"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium", layout_file="layouts/momentum-part3-teacher.slides.json")
 
 
@@ -9,8 +19,16 @@ def _():
     import marimo as mo
     import numpy as np
     import altair as alt
+    from marimo_learn import NumericEntryWidget, PredictThenCheckWidget, OrderingWidget
 
-    return alt, mo, np
+    return (
+        NumericEntryWidget,
+        OrderingWidget,
+        PredictThenCheckWidget,
+        alt,
+        mo,
+        np,
+    )
 
 
 @app.cell(hide_code=True)
@@ -211,97 +229,81 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
-    **2. A 0.15 kg cricket ball travelling at 25 m/s is caught and brought to
-    rest in 0.2 s. Calculate the average force on the ball.**
+    mo.md("""
+    **2.**
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    q1_answer = mo.ui.number(start=0, stop=100, step=0.1, label="Your answer (N):")
-    q1_answer
-    return (q1_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q1_answer):
-    _correct = 0.15 * 25 / 0.2
-    if q1_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q1_answer.value - _correct) < 1:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Try again, $F = \\dfrac{m\\Delta v}{\\Delta t} = \\dfrac{0.15 \\times 25}{0.2}$.")
-    _fb
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.accordion(
-        {
-            "Solution": mo.md(
-                """
-                $F = \\dfrac{m\\,\\Delta v}{\\Delta t}$
-
-                $m = 0.15, \\quad \\Delta v = 25, \\quad \\Delta t = 0.2$
-
-                $F = \\dfrac{0.15 \\times 25}{0.2} = 18.75 \\text{ N}$
-                """
-            )
-        }
+def _(NumericEntryWidget, mo):
+    q1_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="A 0.15 kg cricket ball travelling at 25 m/s is caught and brought to rest in 0.2 s. Calculate the average force on the ball, in N.",
+            correct_answer=0.15 * 25 / 0.2,
+            tolerance=1,
+            explanation="F = mΔv/Δt = (0.15 × 25) / 0.2 = 18.75 N",
+        )
     )
+    q1_check
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
+    mo.md("""
     ## Quick practice
-
-    **Q1. A golf club strikes a stationary 0.046 kg golf ball. The contact time
-    is 0.00050 s and the ball leaves at 65.0 m/s. Calculate the average force on
-    the ball.**
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    q2_answer = mo.ui.number(start=0, stop=20000, step=1, label="Your answer (N):")
-    q2_answer
-    return (q2_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q2_answer):
-    _correct = 0.046 * 65.0 / 0.00050
-    if q2_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q2_answer.value - _correct) < 100:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Try again, find $m\\Delta v = 0.046 \\times 65$, then divide by 0.00050.")
-    _fb
+def _(NumericEntryWidget, mo):
+    q2_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question=(
+                "Q1. A golf club strikes a stationary 0.046 kg golf ball. "
+                "The contact time is 0.00050 s and the ball leaves at "
+                "65.0 m/s. Calculate the average force on the ball, in N."
+            ),
+            correct_answer=0.046 * 65.0 / 0.00050,
+            tolerance=100,
+            explanation=(
+                "mΔv = 0.046 × 65.0 = 2.99 kg m s⁻¹. "
+                "F = mΔv/Δt = 2.99 / 0.00050 = 5980 N"
+            ),
+        )
+    )
+    q2_check
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.accordion(
-        {
-            "Solution": mo.md(
-                """
-                $m\\Delta v = 0.046 \\times 65.0 = 2.99 \\text{ kg m s}^{-1}$
+    mo.md(r"""
+    ## Order it: solving an impulse problem
 
-                $F = \\dfrac{m\\Delta v}{\\Delta t} = \\dfrac{2.99}{0.00050}
-                = 5980 \\text{ N}$
-                """
-            )
-        }
+    Same idea, as a general method — put these steps in the right order.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(OrderingWidget, mo):
+    order_check = mo.ui.anywidget(
+        OrderingWidget(
+            question="Arrange these steps for solving an impulse/force problem in order:",
+            items=[
+                "Identify the known mass, change in velocity, and collision time",
+                "Choose F = mΔv/Δt (or J = FΔt if solving for impulse instead)",
+                "Substitute the known values",
+                "Solve for the unknown quantity",
+                "Check the answer's sign/magnitude makes physical sense",
+            ],
+            shuffle=True,
+        )
     )
+    order_check
     return
 
 
@@ -348,64 +350,41 @@ def _(mo):
     mo.md(r"""
     ------
 
-    ## Additional activity: predict, observe, explain
+    ## Predict, then check
 
-    **Predict** first (before touching anything), then **observe** using the
-    mass, $\Delta v$ and collision-time sliders further up the page, then
-    **explain** what you saw.
-
-    Leave the mass and $\Delta v$ as they are. Set the **collision time to
-    $\Delta t = 0.2$ s** and note the force. Now you are going to **double the
-    collision time to $\Delta t = 0.4$ s**.
-
-    **Predict:** what will happen to the force experienced?
+    Try the sliders further up the page first if you like, then predict.
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    poe_predict = mo.ui.radio(
-        options=[
-            "It stays the same",
-            "It doubles",
-            "It halves",
-            "It goes down, but not exactly half",
-        ],
-        label="My prediction:",
+def _(PredictThenCheckWidget, mo):
+    poe_check = mo.ui.anywidget(
+        PredictThenCheckWidget(
+            question=(
+                "A person of fixed mass and Δv is stopping in a car crash. "
+                "At collision time Δt = 0.2 s the force is F. If the "
+                "collision time is doubled to Δt = 0.4 s, what happens to "
+                "the force?"
+            ),
+            code="F = mΔv / Δt\nAt Δt = 0.2 s: F\nAt Δt = 0.4 s: ?",
+            output="F is halved",
+            options=[
+                "It stays the same",
+                "It doubles",
+                "It halves",
+                "It goes down, but not exactly half",
+            ],
+            correct_answer=2,
+            explanations=[
+                "Wrong: F = mΔv/Δt — changing Δt on the bottom of the fraction does change F.",
+                "Wrong: doubling the denominator makes F smaller, not bigger.",
+                "Correct: mass and Δv (so the impulse mΔv) are unchanged; doubling Δt on the bottom exactly halves F — force and collision time are inversely proportional.",
+                "Wrong: because mΔv is exactly fixed, doubling Δt gives an exact half, not an approximate change.",
+            ],
+        )
     )
-    poe_predict
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    poe_explain = mo.ui.text_area(
-        placeholder="Now drag the collision-time slider from 0.2 s to 0.4 s. What happened to the force, and why?",
-        label="Observe, then explain:",
-        full_width=True,
-    )
-    poe_explain
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.accordion(
-        {
-            "Reveal answer": mo.md(
-                """
-                **It halves.** The force is $F = m\\Delta v / \\Delta t$. The
-                mass and $\\Delta v$ are unchanged, so the impulse on top stays
-                the same. Doubling the time on the bottom halves the force, force
-                and collision time are *inversely proportional*. This is exactly
-                why a longer, softer collision (airbag, crumple zone, bent knees)
-                protects you: same impulse, spread over more time, means less
-                force.
-                """
-            )
-        }
-    )
+    poe_check
     return
 
 

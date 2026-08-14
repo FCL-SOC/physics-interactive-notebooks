@@ -1,6 +1,16 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "marimo",
+#     "altair",
+#     "numpy",
+#     "marimo-learn==0.14.0",
+# ]
+# ///
+
 import marimo
 
-__generated_with = "0.23.14"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium")
 
 
@@ -9,8 +19,23 @@ def _():
     import marimo as mo
     import numpy as np
     import altair as alt
+    from marimo_learn import (
+        NumericEntryWidget,
+        PredictThenCheckWidget,
+        LabelingWidget,
+        MatchingWidget,
+        ConceptMapWidget,
+    )
 
-    return mo, alt
+    return (
+        ConceptMapWidget,
+        LabelingWidget,
+        MatchingWidget,
+        NumericEntryWidget,
+        PredictThenCheckWidget,
+        alt,
+        mo,
+    )
 
 
 @app.cell(hide_code=True)
@@ -293,132 +318,67 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
-    **2. A 0.058 kg tennis ball is served at 50 m/s. Calculate its momentum.**
-
-    *Hint: use $p = mv$.*
+    mo.md("""
+    **2.**
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    q1_answer = mo.ui.number(start=0, stop=100, step=0.01, label="Your answer (kg m/s):")
-    q1_answer
-    return (q1_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q1_answer):
-    _correct = 0.058 * 50
-    if q1_answer.value == 0:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q1_answer.value - _correct) < 0.05:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Not quite, use $p = mv$ with $m = 0.058$ and $v = 50$.")
-    _fb
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.accordion(
-        {
-            "Solution": mo.md(
-                """
-                $p = mv$
-
-                $m = 0.058, \\quad v = 50$
-
-                $p = 0.058 \\times 50 = 2.9 \\text{ kg m s}^{-1}$
-                """
-            )
-        }
+def _(NumericEntryWidget, mo):
+    q1_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="A 0.058 kg tennis ball is served at 50 m/s. Calculate its momentum, in kg m/s.",
+            correct_answer=0.058 * 50,
+            tolerance=0.05,
+            explanation="p = mv = 0.058 × 50 = 2.9 kg m s⁻¹",
+        )
     )
+    q1_check
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
+    mo.md("""
     ## Quick practice
-
-    **Q1. Calculate the momentum of a 5.20 kg cat running north at 4.50 m/s.**
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    q2_answer = mo.ui.number(start=0, stop=100, step=0.01, label="Your answer (kg m/s):")
-    q2_answer
-    return (q2_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q2_answer):
-    _correct = 5.20 * 4.50
-    if q2_answer.value == 0:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q2_answer.value - _correct) < 0.1:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Try again, $p = 5.20 \\times 4.50$.")
-    _fb
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    **Q2. A 9 kg bowling ball moves at +12 m/s. A 5 kg bowling ball has the
-    *same* momentum. What is the velocity of the 5 kg ball?**
-
-    *Hint: first find the momentum of the 9 kg ball, then use it to find the
-    velocity of the 5 kg ball.*
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    q3_answer = mo.ui.number(start=0, stop=50, step=0.01, label="Your answer (m/s):")
-    q3_answer
-    return (q3_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q3_answer):
-    _correct = 9 * 12 / 5
-    if q3_answer.value == 0:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q3_answer.value - _correct) < 0.05:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Not quite, find $p = 9 \\times 12$ first, then divide by 5.")
-    _fb
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.accordion(
-        {
-            "Solution": mo.md(
-                """
-                Momentum of the 9 kg ball: $p = 9 \\times 12 = 108
-                \\text{ kg m s}^{-1}$.
-
-                The 5 kg ball has the same momentum, so:
-
-                $108 = 5 \\times v$
-
-                $v = 108 \\div 5 = 21.6 \\text{ m/s}$
-                """
-            )
-        }
+def _(NumericEntryWidget, mo):
+    q2_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="Q1. Calculate the momentum of a 5.20 kg cat running north at 4.50 m/s, in kg m/s.",
+            correct_answer=5.20 * 4.50,
+            tolerance=0.1,
+            explanation="p = mv = 5.20 × 4.50 = 23.4 kg m s⁻¹",
+        )
     )
+    q2_check
+    return
+
+
+@app.cell(hide_code=True)
+def _(NumericEntryWidget, mo):
+    q3_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question=(
+                "Q2. A 9 kg bowling ball moves at +12 m/s. A 5 kg bowling "
+                "ball has the same momentum. What is the velocity of the "
+                "5 kg ball, in m/s?"
+            ),
+            correct_answer=9 * 12 / 5,
+            tolerance=0.05,
+            explanation=(
+                "Momentum of the 9 kg ball: p = 9 × 12 = 108 kg m s⁻¹. "
+                "The 5 kg ball has the same momentum, so 108 = 5 × v, "
+                "giving v = 108 ÷ 5 = 21.6 m/s."
+            ),
+        )
+    )
+    q3_check
     return
 
 
@@ -427,59 +387,123 @@ def _(mo):
     mo.md(r"""
     ------
 
-    ## Additional activity: predict, observe, explain
+    ## Additional activity: predict, then check
 
-    **Predict** first (before touching anything), then **observe** using the
-    Ball 1 and Ball 2 sliders further up the page, then **explain** what you saw.
-
-    Start with **Ball 1 at mass = 10 kg, velocity = 4 m/s**. You are going to
-    **double the velocity to 8 m/s** (leaving the mass at 10 kg).
-
-    **Predict:** what will happen to Ball 1's momentum bar?
+    Try the sliders above first if you like, then predict without them.
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    poe_predict = mo.ui.radio(
-        options=[
-            "It stays the same",
-            "It doubles",
-            "It halves",
-            "It goes up by 10",
-        ],
-        label="My prediction:",
+def _(PredictThenCheckWidget, mo):
+    poe_check = mo.ui.anywidget(
+        PredictThenCheckWidget(
+            question=(
+                "Ball 1 starts at mass = 10 kg, velocity = 4 m/s "
+                "(momentum = 40 kg·m/s). If you double the velocity to "
+                "8 m/s, leaving the mass unchanged, what happens to the "
+                "momentum?"
+            ),
+            code="p = m × v\n10 kg × 4 m/s = 40 kg·m/s\n10 kg × 8 m/s = ?",
+            output="10 kg × 8 m/s = 80 kg·m/s",
+            options=[
+                "It stays the same",
+                "It doubles",
+                "It halves",
+                "It goes up by 10",
+            ],
+            correct_answer=1,
+            explanations=[
+                "Wrong: momentum depends on velocity as well as mass, so changing v does change p.",
+                "Correct: momentum is directly proportional to velocity (p = mv), so doubling v doubles p — from 40 to 80 kg·m/s.",
+                "Wrong: halving would happen if velocity were halved, not doubled.",
+                "Wrong: momentum scales multiplicatively with velocity (×2), not by a fixed addition.",
+            ],
+        )
     )
-    poe_predict
+    poe_check
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    poe_explain = mo.ui.text_area(
-        placeholder="Now move Ball 1's velocity slider to 8 m/s. What happened to the momentum, and why?",
-        label="Observe, then explain:",
-        full_width=True,
+    mo.md(r"""
+    ## Match it: quantity and unit
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(MatchingWidget, mo):
+    unit_match = mo.ui.anywidget(
+        MatchingWidget(
+            question="Match each quantity to its SI unit:",
+            left=["Momentum, p", "Mass, m", "Velocity, v"],
+            right=["kg m s⁻¹", "kg", "m s⁻¹"],
+            correct_matches={0: 0, 1: 1, 2: 2},
+        )
     )
-    poe_explain
+    unit_match
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.accordion(
-        {
-            "Reveal answer": mo.md(
-                """
-                **It doubles.** Momentum is $p = mv$. The mass is unchanged, so
-                doubling the velocity doubles the momentum: it goes from
-                $10 \\times 4 = 40$ kg m/s to $10 \\times 8 = 80$ kg m/s.
-                Momentum is *directly proportional* to velocity.
-                """
-            )
-        }
+    mo.md(r"""
+    ## Label it: the worked example, step by step
+
+    Here's the same 1200 kg car example from earlier — this time, label
+    which step each line belongs to.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(LabelingWidget, mo):
+    worked_example_label = mo.ui.anywidget(
+        LabelingWidget(
+            question="Label each line of this worked momentum problem:",
+            labels=["Identify knowns", "Apply formula", "Substitute values", "State answer"],
+            text_lines=[
+                "m = 1200 kg, v = 15 m/s east",
+                "p = mv",
+                "p = 1200 × 15",
+                "p = 18 000 kg m/s east",
+            ],
+            correct_labels={0: [0], 1: [1], 2: [2], 3: [3]},
+        )
     )
+    worked_example_label
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Concept map: getting from one quantity to another
+
+    $p = mv$ isn't just one formula — it's three, depending on which
+    quantity you're solving for. Map how to get from one to another.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(ConceptMapWidget, mo):
+    momentum_concept_map = mo.ui.anywidget(
+        ConceptMapWidget(
+            question="Map how to convert between these quantities:",
+            concepts=["Momentum (p)", "Mass (m)", "Velocity (v)"],
+            terms=["× v →", "× m →", "÷ v →", "÷ m →"],
+            correct_edges=[
+                {"from": "Mass (m)", "to": "Momentum (p)", "label": "× v →"},
+                {"from": "Velocity (v)", "to": "Momentum (p)", "label": "× m →"},
+                {"from": "Momentum (p)", "to": "Mass (m)", "label": "÷ v →"},
+                {"from": "Momentum (p)", "to": "Velocity (v)", "label": "÷ m →"},
+            ],
+        )
+    )
+    momentum_concept_map
     return
 
 

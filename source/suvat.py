@@ -1,6 +1,16 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "marimo",
+#     "altair",
+#     "numpy",
+#     "marimo-learn==0.14.0",
+# ]
+# ///
+
 import marimo
 
-__generated_with = "0.23.14"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium")
 
 
@@ -9,79 +19,77 @@ def _():
     import marimo as mo
     import numpy as np
     import altair as alt
+    from marimo_learn import NumericEntryWidget, MatchingWidget, ConceptMapWidget
 
-    return alt, mo, np
+    return ConceptMapWidget, MatchingWidget, NumericEntryWidget, alt, mo, np
 
 
-@app.cell(hide_code=True)
-def _(alt):
-    def line_chart(
-        x, y, color, xlim, ylim, xlabel, ylabel, title,
-        fill=False, fill_label=None, fill_x=None, fill_y=None,
-        scatter=None, scatter_color="#d62728",
-        width=480, height=320,
-    ):
-        # Shared single-panel line-chart builder for all SUVAT graphs: a
-        # plain Vega-Lite spec dict (not chained Altair calls, which are
-        # much slower to rebuild on every slider move — see momentum-part1
-        # for the measured comparison). Edit colours/labels/domains as
-        # plain dict values below; each chart cell just calls this with
-        # its own x/y data and options. fill_x/fill_y let the shaded area
-        # cover a different (usually shorter) range than the line itself;
-        # they default to the line's own x/y when not given.
-        _pts = [{"x": float(_x), "y": float(_y)} for _x, _y in zip(x, y)]
-        _x_enc = {"field": "x", "type": "quantitative", "title": xlabel,
-                   "scale": {"domain": list(xlim)}, "axis": {"grid": False}}
-        _y_enc = {"field": "y", "type": "quantitative", "title": ylabel,
-                   "scale": {"domain": list(ylim)}, "axis": {"grid": False}}
-        _layers = []
-        if fill:
-            _fill_x = x if fill_x is None else fill_x
-            _fill_y = y if fill_y is None else fill_y
-            _fill_pts = [{"x": float(_x), "y": float(_y)} for _x, _y in zip(_fill_x, _fill_y)]
-            _layers.append({
-                "data": {"values": _fill_pts},
-                "mark": {"type": "area", "color": color, "opacity": 0.3},
-                "encoding": {"x": _x_enc, "y": _y_enc},
-            })
+@app.function(hide_code=True)
+def line_chart(
+    x, y, color, xlim, ylim, xlabel, ylabel, title,
+    fill=False, fill_label=None, fill_x=None, fill_y=None,
+    scatter=None, scatter_color="#d62728",
+    width=480, height=320,
+):
+    # Shared single-panel line-chart builder for all SUVAT graphs: a
+    # plain Vega-Lite spec dict (not chained Altair calls, which are
+    # much slower to rebuild on every slider move — see momentum-part1
+    # for the measured comparison). Edit colours/labels/domains as
+    # plain dict values below; each chart cell just calls this with
+    # its own x/y data and options. fill_x/fill_y let the shaded area
+    # cover a different (usually shorter) range than the line itself;
+    # they default to the line's own x/y when not given.
+    _pts = [{"x": float(_x), "y": float(_y)} for _x, _y in zip(x, y)]
+    _x_enc = {"field": "x", "type": "quantitative", "title": xlabel,
+               "scale": {"domain": list(xlim)}, "axis": {"grid": False}}
+    _y_enc = {"field": "y", "type": "quantitative", "title": ylabel,
+               "scale": {"domain": list(ylim)}, "axis": {"grid": False}}
+    _layers = []
+    if fill:
+        _fill_x = x if fill_x is None else fill_x
+        _fill_y = y if fill_y is None else fill_y
+        _fill_pts = [{"x": float(_x), "y": float(_y)} for _x, _y in zip(_fill_x, _fill_y)]
         _layers.append({
-            "mark": {"type": "line", "color": color, "strokeWidth": 2},
+            "data": {"values": _fill_pts},
+            "mark": {"type": "area", "color": color, "opacity": 0.3},
             "encoding": {"x": _x_enc, "y": _y_enc},
         })
+    _layers.append({
+        "mark": {"type": "line", "color": color, "strokeWidth": 2},
+        "encoding": {"x": _x_enc, "y": _y_enc},
+    })
+    _layers.append({
+        "data": {"values": [{"y": 0}]},
+        "mark": {"type": "rule", "color": "black", "strokeWidth": 0.8},
+        "encoding": {"y": {"field": "y", "type": "quantitative"}},
+    })
+    if fill and fill_label:
+        _mid = _fill_pts[len(_fill_pts) // 2]
         _layers.append({
-            "data": {"values": [{"y": 0}]},
-            "mark": {"type": "rule", "color": "black", "strokeWidth": 0.8},
-            "encoding": {"y": {"field": "y", "type": "quantitative"}},
+            "data": {"values": [{"x": _mid["x"], "y": _mid["y"] / 2}]},
+            "mark": {"type": "text", "fontWeight": "bold", "fontSize": 11},
+            "encoding": {
+                "x": {"field": "x", "type": "quantitative"},
+                "y": {"field": "y", "type": "quantitative"},
+                "text": {"value": fill_label},
+            },
         })
-        if fill and fill_label:
-            _mid = _fill_pts[len(_fill_pts) // 2]
-            _layers.append({
-                "data": {"values": [{"x": _mid["x"], "y": _mid["y"] / 2}]},
-                "mark": {"type": "text", "fontWeight": "bold", "fontSize": 11},
-                "encoding": {
-                    "x": {"field": "x", "type": "quantitative"},
-                    "y": {"field": "y", "type": "quantitative"},
-                    "text": {"value": fill_label},
-                },
-            })
-        if scatter:
-            _layers.append({
-                "data": {"values": [{"x": scatter[0], "y": scatter[1]}]},
-                "mark": {"type": "point", "color": scatter_color, "size": 70, "filled": True},
-                "encoding": {
-                    "x": {"field": "x", "type": "quantitative"},
-                    "y": {"field": "y", "type": "quantitative"},
-                },
-            })
-        return {
-            "data": {"values": _pts},
-            "layer": _layers,
-            "width": width,
-            "height": height,
-            "title": title,
-        }
-
-    return (line_chart,)
+    if scatter:
+        _layers.append({
+            "data": {"values": [{"x": scatter[0], "y": scatter[1]}]},
+            "mark": {"type": "point", "color": scatter_color, "size": 70, "filled": True},
+            "encoding": {
+                "x": {"field": "x", "type": "quantitative"},
+                "y": {"field": "y", "type": "quantitative"},
+            },
+        })
+    return {
+        "data": {"values": _pts},
+        "layer": _layers,
+        "width": width,
+        "height": height,
+        "title": title,
+    }
 
 
 @app.cell(hide_code=True)
@@ -151,7 +159,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(a_slider1, alt, line_chart, mo, np, t_slider1, u_slider1):
+def _(a_slider1, alt, mo, np, t_slider1, u_slider1):
     _t_range = np.linspace(0, 10, 200)
     _v_range = u_slider1.value + a_slider1.value * _t_range
 
@@ -214,47 +222,23 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
-    2. **A rocket sled starts from rest and accelerates at 15 m/s² for 4 s. Calculate its final velocity.**
+    mo.md("""
+    **2.**
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    q1_answer = mo.ui.number(start=0, stop=200, step=0.1, label="Your answer (m/s):")
-    q1_answer
-    return (q1_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q1_answer):
-    _correct = 0 + 15 * 4
-    if q1_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q1_answer.value - _correct) < 0.5:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Try again, use $v = u + at$.")
-    _fb
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.accordion(
-        {
-            "Solution": mo.md(
-                """
-                $v = u + at$
-
-                $u = 0$, $a = 15$, $t = 4$
-
-                $v = 0 + 15 \\times 4 = 60$ m/s
-                """
-            )
-        }
+def _(NumericEntryWidget, mo):
+    q1_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="A rocket sled starts from rest and accelerates at 15 m/s² for 4 s. Calculate its final velocity, in m/s.",
+            correct_answer=0 + 15 * 4,
+            tolerance=0.5,
+            explanation="v = u + at = 0 + 15 × 4 = 60 m/s",
+        )
     )
+    q1_check
     return
 
 
@@ -294,7 +278,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(a_slider2, alt, line_chart, mo, np, t_slider2, u_slider2):
+def _(a_slider2, alt, mo, np, t_slider2, u_slider2):
     _t_range = np.linspace(0, 10, 200)
     _v_range = u_slider2.value + a_slider2.value * _t_range
     _t_fill = np.linspace(0, t_slider2.value, 100)
@@ -360,47 +344,23 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
-    2. **A skateboarder starts at 2 m/s and accelerates at 1.5 m/s² for 4 s. Calculate the distance travelled.**
+    mo.md("""
+    **2.**
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    q2_answer = mo.ui.number(start=0, stop=200, step=0.1, label="Your answer (m):")
-    q2_answer
-    return (q2_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q2_answer):
-    _correct = 2 * 4 + 0.5 * 1.5 * 4 ** 2
-    if q2_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q2_answer.value - _correct) < 0.5:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Try again, remember to square $t$.")
-    _fb
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.accordion(
-        {
-            "Solution": mo.md(
-                """
-                $s = ut + \\frac{1}{2}at^2$
-
-                $u = 2$, $a = 1.5$, $t = 4$
-
-                $s = (2)(4) + \\frac{1}{2}(1.5)(4)^2 = 8 + 12 = 20$ m
-                """
-            )
-        }
+def _(NumericEntryWidget, mo):
+    q2_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="A skateboarder starts at 2 m/s and accelerates at 1.5 m/s² for 4 s. Calculate the distance travelled, in m.",
+            correct_answer=2 * 4 + 0.5 * 1.5 * 4**2,
+            tolerance=0.5,
+            explanation="s = ut + ½at² = (2)(4) + ½(1.5)(4)² = 8 + 12 = 20 m",
+        )
     )
+    q2_check
     return
 
 
@@ -440,7 +400,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(a_slider3, alt, line_chart, mo, np, s_slider3, u_slider3):
+def _(a_slider3, alt, mo, np, s_slider3, u_slider3):
     _s_range = np.linspace(0, 100, 200)
     _v2_range = u_slider3.value ** 2 + 2 * a_slider3.value * _s_range
     _v2_point = u_slider3.value ** 2 + 2 * a_slider3.value * s_slider3.value
@@ -486,72 +446,44 @@ def _(mo):
     mo.md(r"""
     ### Checkpoint 3
 
-    1. **Which variable does this equation let you avoid using?**
+    1. **Match each equation to the variable it lets you avoid using.**
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.accordion(
-        {
-            "Compare your answer": mo.md(
-                """
-                Time, $t$. This equation is derived by combining
-                $v = u + at$ and $s = ut + \\frac{1}{2}at^2$ to eliminate $t$,
-                so it's useful whenever time is unknown.
-                """
-            )
-        }
+def _(MatchingWidget, mo):
+    equation_match = mo.ui.anywidget(
+        MatchingWidget(
+            question="Match each SUVAT equation to the variable it omits:",
+            left=["v = u + at", "s = ut + ½at²", "v² = u² + 2as", "s = ½(u+v)t", "s = vt − ½at²"],
+            right=["s", "v", "t", "a", "u"],
+            correct_matches={0: 0, 1: 1, 2: 2, 3: 3, 4: 4},
+        )
     )
+    equation_match
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
-    2. **A train decelerates from 30 m/s at 2 m/s² over 100 m. Calculate its speed after travelling that distance.**
+    mo.md("""
+    **2.**
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    q3_answer = mo.ui.number(start=0, stop=50, step=0.01, label="Your answer (m/s):")
-    q3_answer
-    return (q3_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q3_answer):
-    _correct = (30 ** 2 + 2 * (-2) * 100) ** 0.5
-    if q3_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q3_answer.value - _correct) < 0.1:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Try again, remember the train is decelerating so $a$ is negative.")
-    _fb
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.accordion(
-        {
-            "Solution": mo.md(
-                """
-                $v^2 = u^2 + 2as$
-
-                $u = 30$, $a = -2$, $s = 100$
-
-                $v^2 = (30)^2 + 2(-2)(100) = 900 - 400 = 500$
-
-                $v = \\sqrt{500} = 22.36$ m/s
-                """
-            )
-        }
+def _(NumericEntryWidget, mo):
+    q3_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="A train decelerates from 30 m/s at 2 m/s² over 100 m. Calculate its speed after travelling that distance, in m/s. (Remember: the train is decelerating, so a is negative.)",
+            correct_answer=(30**2 + 2 * (-2) * 100) ** 0.5,
+            tolerance=0.1,
+            explanation="v² = u² + 2as = (30)² + 2(−2)(100) = 900 − 400 = 500, so v = √500 = 22.36 m/s",
+        )
     )
+    q3_check
     return
 
 
@@ -591,7 +523,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(alt, line_chart, mo, t_slider4, u_slider4, v_slider4):
+def _(alt, mo, t_slider4, u_slider4, v_slider4):
     _t = t_slider4.value
     _u = u_slider4.value
     _v = v_slider4.value
@@ -665,47 +597,23 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
-    2. **A skier increases speed from 6 m/s to 14 m/s over 8 s. Calculate the distance travelled.**
+    mo.md("""
+    **2.**
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    q4_answer = mo.ui.number(start=0, stop=300, step=0.1, label="Your answer (m):")
-    q4_answer
-    return (q4_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q4_answer):
-    _correct = 0.5 * (6 + 14) * 8
-    if q4_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q4_answer.value - _correct) < 0.5:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Try again, use $s = \\frac{1}{2}(u+v)t$.")
-    _fb
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.accordion(
-        {
-            "Solution": mo.md(
-                """
-                $s = \\frac{1}{2}(u+v)t$
-
-                $u = 6$, $v = 14$, $t = 8$
-
-                $s = \\frac{1}{2}(6+14)(8) = \\frac{1}{2}(20)(8) = 80$ m
-                """
-            )
-        }
+def _(NumericEntryWidget, mo):
+    q4_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="A skier increases speed from 6 m/s to 14 m/s over 8 s. Calculate the distance travelled, in m.",
+            correct_answer=0.5 * (6 + 14) * 8,
+            tolerance=0.5,
+            explanation="s = ½(u+v)t = ½(6+14)(8) = ½(20)(8) = 80 m",
+        )
     )
+    q4_check
     return
 
 
@@ -745,7 +653,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(a_slider5, alt, line_chart, mo, np, t_slider5, v_slider5):
+def _(a_slider5, alt, mo, np, t_slider5, v_slider5):
     _t_end = t_slider5.value
     _u = v_slider5.value - a_slider5.value * _t_end
     _t_range = np.linspace(0, _t_end, 200)
@@ -812,47 +720,52 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
-    2. **A skier's velocity is 18 m/s at the bottom of a slope, after decelerating at 1 m/s² for 6 s along a flat run-out. Calculate the distance travelled during that interval.**
+    mo.md("""
+    **2.**
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    q5_answer = mo.ui.number(start=0, stop=300, step=0.1, label="Your answer (m):")
-    q5_answer
-    return (q5_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q5_answer):
-    _correct = 18 * 6 - 0.5 * 1 * 6 ** 2
-    if q5_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q5_answer.value - _correct) < 0.5:
-        _fb = mo.md("**Correct.**")
-    else:
-        _fb = mo.md("Try again, use $s = vt - \\frac{1}{2}at^2$ with $v = 18$.")
-    _fb
+def _(NumericEntryWidget, mo):
+    q5_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="A skier's velocity is 18 m/s at the bottom of a slope, after decelerating at 1 m/s² for 6 s along a flat run-out. Calculate the distance travelled during that interval, in m.",
+            correct_answer=18 * 6 - 0.5 * 1 * 6**2,
+            tolerance=0.5,
+            explanation="s = vt − ½at² = (18)(6) − ½(1)(6)² = 108 − 18 = 90 m",
+        )
+    )
+    q5_check
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.accordion(
-        {
-            "Solution": mo.md(
-                """
-                $s = vt - \\frac{1}{2}at^2$
+    mo.md(r"""
+    ----------
+    ## Concept map: velocity, acceleration, and displacement
 
-                $v = 18$, $a = 1$, $t = 6$
+    On a v-t graph, both of the "extra" quantities in the SUVAT equations
+    come straight from velocity. Map how.
+    """)
+    return
 
-                $s = (18)(6) - \\frac{1}{2}(1)(6)^2 = 108 - 18 = 90$ m
-                """
-            )
-        }
+
+@app.cell(hide_code=True)
+def _(ConceptMapWidget, mo):
+    suvat_concept_map = mo.ui.anywidget(
+        ConceptMapWidget(
+            question="Map the relationships between these quantities:",
+            concepts=["Velocity (v)", "Acceleration (a)", "Displacement (s)"],
+            terms=["rate of change →", "area under graph →"],
+            correct_edges=[
+                {"from": "Velocity (v)", "to": "Acceleration (a)", "label": "rate of change →"},
+                {"from": "Velocity (v)", "to": "Displacement (s)", "label": "area under graph →"},
+            ],
+        )
     )
+    suvat_concept_map
     return
 
 
@@ -868,151 +781,72 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    **Q1 ($v = u + at$).** A sprinter accelerates from rest at 4.5 m/s² for 2.2 s. Calculate her velocity at the end of this time.
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    q6_answer = mo.ui.number(start=0, stop=50, step=0.01, label="Your answer (m/s):")
-    q6_answer
-    return (q6_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q6_answer):
-    _correct = 0 + 4.5 * 2.2
-    if q6_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q6_answer.value - _correct) < 0.1:
-        _fb = mo.md(f"**Correct.** $v = u + at = 0 + 4.5 \\times 2.2 = {_correct:.2f}$ m/s.")
-    else:
-        _fb = mo.md(f"Not quite. (Correct answer: {_correct:.2f} m/s)")
-    _fb
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    **Q2 ($s = ut + \frac{1}{2}at^2$).** A shopping trolley rolling at 1.2 m/s accelerates down a ramp at 0.8 m/s² for 3 s. Calculate the distance it travels.
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    q7_answer = mo.ui.number(start=0, stop=50, step=0.01, label="Your answer (m):")
-    q7_answer
-    return (q7_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q7_answer):
-    _correct = 1.2 * 3 + 0.5 * 0.8 * 3 ** 2
-    if q7_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q7_answer.value - _correct) < 0.1:
-        _fb = mo.md(
-            f"**Correct.** $s = ut + \\frac{{1}}{{2}}at^2 = (1.2)(3) + \\frac{{1}}{{2}}(0.8)(3)^2 = {_correct:.2f}$ m."
+def _(NumericEntryWidget, mo):
+    q6_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="Q1 (v = u + at). A sprinter accelerates from rest at 4.5 m/s² for 2.2 s. Calculate her velocity at the end of this time, in m/s.",
+            correct_answer=0 + 4.5 * 2.2,
+            tolerance=0.1,
+            explanation="v = u + at = 0 + 4.5 × 2.2 = 9.90 m/s",
         )
-    else:
-        _fb = mo.md(f"Not quite. (Correct answer: {_correct:.2f} m)")
-    _fb
+    )
+    q6_check
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    **Q3 ($v^2 = u^2 + 2as$).** A plane must reach 70 m/s to take off. If it accelerates from rest at 2.5 m/s², calculate the minimum runway length required.
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    q8_answer = mo.ui.number(start=0, stop=5000, step=1, label="Your answer (m):")
-    q8_answer
-    return (q8_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q8_answer):
-    _correct = (70 ** 2 - 0 ** 2) / (2 * 2.5)
-    if q8_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q8_answer.value - _correct) < 5:
-        _fb = mo.md(
-            f"**Correct.** $v^2 = u^2 + 2as \\Rightarrow s = \\dfrac{{v^2 - u^2}}{{2a}} = "
-            f"\\dfrac{{70^2 - 0^2}}{{2(2.5)}} = {_correct:,.0f}$ m."
+def _(NumericEntryWidget, mo):
+    q7_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="Q2 (s = ut + ½at²). A shopping trolley rolling at 1.2 m/s accelerates down a ramp at 0.8 m/s² for 3 s. Calculate the distance it travels, in m.",
+            correct_answer=1.2 * 3 + 0.5 * 0.8 * 3**2,
+            tolerance=0.1,
+            explanation="s = ut + ½at² = (1.2)(3) + ½(0.8)(3)² = 3.60 + 3.60 = 7.20 m",
         )
-    else:
-        _fb = mo.md(f"Not quite. (Correct answer: {_correct:,.0f} m)")
-    _fb
+    )
+    q7_check
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    **Q4 ($s = \frac{1}{2}(u+v)t$).** A lift accelerates uniformly from 0 m/s to 3 m/s over 2.5 s. Calculate the distance it travels while accelerating.
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    q9_answer = mo.ui.number(start=0, stop=50, step=0.01, label="Your answer (m):")
-    q9_answer
-    return (q9_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q9_answer):
-    _correct = 0.5 * (0 + 3) * 2.5
-    if q9_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q9_answer.value - _correct) < 0.1:
-        _fb = mo.md(
-            f"**Correct.** $s = \\frac{{1}}{{2}}(u+v)t = \\frac{{1}}{{2}}(0+3)(2.5) = {_correct:.2f}$ m."
+def _(NumericEntryWidget, mo):
+    q8_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="Q3 (v² = u² + 2as). A plane must reach 70 m/s to take off. If it accelerates from rest at 2.5 m/s², calculate the minimum runway length required, in m.",
+            correct_answer=(70**2 - 0**2) / (2 * 2.5),
+            tolerance=5,
+            explanation="v² = u² + 2as ⟹ s = (v² − u²)/(2a) = (70² − 0²)/(2×2.5) = 980 m",
         )
-    else:
-        _fb = mo.md(f"Not quite. (Correct answer: {_correct:.2f} m)")
-    _fb
+    )
+    q8_check
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    **Q5 ($s = vt - \frac{1}{2}at^2$).** A car's velocity is 12 m/s as it reaches a stop sign, having decelerated at 3 m/s² for 4 s beforehand. Calculate the distance travelled during that 4 s.
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    q10_answer = mo.ui.number(start=0, stop=200, step=0.01, label="Your answer (m):")
-    q10_answer
-    return (q10_answer,)
-
-
-@app.cell(hide_code=True)
-def _(mo, q10_answer):
-    _correct = 12 * 4 - 0.5 * (-3) * 4 ** 2
-    if q10_answer.value is None:
-        _fb = mo.md("*Enter a value above.*")
-    elif abs(q10_answer.value - _correct) < 0.5:
-        _fb = mo.md(
-            f"**Correct.** $s = vt - \\frac{{1}}{{2}}at^2 = (12)(4) - \\frac{{1}}{{2}}(-3)(4)^2 = {_correct:.2f}$ m."
+def _(NumericEntryWidget, mo):
+    q9_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="Q4 (s = ½(u+v)t). A lift accelerates uniformly from 0 m/s to 3 m/s over 2.5 s. Calculate the distance it travels while accelerating, in m.",
+            correct_answer=0.5 * (0 + 3) * 2.5,
+            tolerance=0.1,
+            explanation="s = ½(u+v)t = ½(0+3)(2.5) = 3.75 m",
         )
-    else:
-        _fb = mo.md(f"Not quite. (Correct answer: {_correct:.2f} m)")
-    _fb
+    )
+    q9_check
+    return
+
+
+@app.cell(hide_code=True)
+def _(NumericEntryWidget, mo):
+    q10_check = mo.ui.anywidget(
+        NumericEntryWidget(
+            question="Q5 (s = vt − ½at²). A car's velocity is 12 m/s as it reaches a stop sign, having decelerated at 3 m/s² for 4 s beforehand. Calculate the distance travelled during that 4 s, in m.",
+            correct_answer=12 * 4 - 0.5 * (-3) * 4**2,
+            tolerance=0.5,
+            explanation="s = vt − ½at² = (12)(4) − ½(−3)(4)² = 48 + 24 = 72 m",
+        )
+    )
+    q10_check
     return
 
 

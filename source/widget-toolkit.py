@@ -27,7 +27,16 @@ def _():
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    from wigglystuff import TangleSlider, Slider2D, Matrix, HoverZoom, TextCompare
+    from wigglystuff import (
+        TangleSlider,
+        Slider2D,
+        Matrix,
+        HoverZoom,
+        TextCompare,
+        ChartPuck,
+        PlaySlider,
+        CircularSlider,
+    )
     from marimo_learn import (
         MultipleChoiceWidget,
         NumericEntryWidget,
@@ -42,6 +51,8 @@ def _():
     )
 
     return (
+        ChartPuck,
+        CircularSlider,
         Color,
         ConceptMapWidget,
         FlashcardWidget,
@@ -52,6 +63,7 @@ def _():
         MultipleChoiceWidget,
         NumericEntryWidget,
         OrderingWidget,
+        PlaySlider,
         PredictThenCheckWidget,
         Slider2D,
         TangleSlider,
@@ -623,6 +635,409 @@ def _(Color, World, mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    ## 15. Click-to-highlight — Altair selections (no new package)
+
+    Not a widget from either package — a native Vega-Lite feature already
+    available through the `alt.Chart.from_dict(...)` pattern used for every
+    chart in this repo. A `"params"` entry defines a click selection; a
+    `"condition"` encoding styles the selected point differently; a second,
+    filtered layer can label just the selected point. All of it runs
+    client-side in the browser, so it costs nothing extra to add — no new
+    dependency, no Python-side recompute.
+
+    **Why reach for this:** anywhere a chart has more data points than
+    sliders can usefully address one at a time (e.g. reading an exact value
+    off a dense line/scatter) — click a point instead of squinting at
+    gridlines.
+
+    _Click a point below._
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(alt, mo, np, pd):
+    _t = np.linspace(0, 5, 11)
+    _v = 2 + 3 * _t
+    _df = pd.DataFrame({"t": _t, "v": _v})
+
+    _spec = {
+        "data": {"values": _df.to_dict("records")},
+        "layer": [
+            {
+                "mark": {"type": "line", "color": "#1f77b4"},
+                "encoding": {
+                    "x": {"field": "t", "type": "quantitative", "title": "t (s)"},
+                    "y": {"field": "v", "type": "quantitative", "title": "v (m/s)"},
+                },
+            },
+            {
+                "params": [
+                    {"name": "click_select", "select": {"type": "point"}, "empty": False}
+                ],
+                "mark": {"type": "point", "size": 90, "filled": True},
+                "encoding": {
+                    "x": {"field": "t", "type": "quantitative"},
+                    "y": {"field": "v", "type": "quantitative"},
+                    "color": {
+                        "condition": {"param": "click_select", "value": "#d62728"},
+                        "value": "#1f77b4",
+                    },
+                    "opacity": {
+                        "condition": {"param": "click_select", "value": 1.0},
+                        "value": 0.6,
+                    },
+                },
+            },
+            {
+                "transform": [
+                    {"filter": {"param": "click_select"}},
+                    {
+                        "calculate": "'t = ' + format(datum.t, '.1f') + ' s, v = ' + format(datum.v, '.1f') + ' m/s'",
+                        "as": "label",
+                    },
+                ],
+                "mark": {"type": "text", "dy": -14, "fontWeight": "bold"},
+                "encoding": {
+                    "x": {"field": "t", "type": "quantitative"},
+                    "y": {"field": "v", "type": "quantitative"},
+                    "text": {"field": "label", "type": "nominal"},
+                },
+            },
+        ],
+        "width": 460,
+        "height": 300,
+        "config": {"view": {"strokeWidth": 0}},
+    }
+    click_highlight_chart = alt.Chart.from_dict(_spec, validate=False)
+    mo.center(click_highlight_chart)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ```python
+    _spec = {
+        "data": {"values": _df.to_dict("records")},
+        "layer": [
+            {"mark": {"type": "line", ...}, "encoding": {...}},
+            {
+                # the param must live on the layer whose marks trigger it,
+                # not at the top level — a top-level param referenced by a
+                # "filter" transform in another layer trips a Vega-Lite bug
+                # ("Duplicate signal name") when compiled.
+                "params": [{"name": "click_select", "select": {"type": "point"}}],
+                "mark": {"type": "point", ...},
+                "encoding": {
+                    "color": {"condition": {"param": "click_select", "value": "#d62728"}, "value": "#1f77b4"},
+                },
+            },
+            {
+                "transform": [{"filter": {"param": "click_select"}}, {"calculate": "...", "as": "label"}],
+                "mark": {"type": "text", ...},
+                "encoding": {"text": {"field": "label", "type": "nominal"}},
+            },
+        ],
+    }
+    alt.Chart.from_dict(_spec, validate=False)   # renders as click-to-highlight, purely client-side
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 16. Drag directly on a matplotlib chart — `ChartPuck`
+
+    Section 15 gets click-to-highlight for free because Vega-Lite compiles it
+    client-side. Matplotlib has no equivalent — `ChartPuck` is the closest
+    thing: an overlay puck you drag across a **real matplotlib figure**,
+    reported back in the chart's own data coordinates (not pixels).
+
+    **Why reach for this:** anywhere the chart itself has to be matplotlib
+    (e.g. it's already built with `ax.annotate`/`fill_between`/etc. that
+    would be a lot of work to port to a Vega-Lite dict-spec) but you still
+    want a "drag to inspect a point" interaction.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(np, plt):
+    _t = np.linspace(0, 5, 11)
+    _v = 2 + 3 * _t
+    _fig, _ax = plt.subplots(figsize=(6, 4), dpi=150)
+    _ax.plot(_t, _v, color="#1f77b4")
+    _ax.set_xlabel("t (s)")
+    _ax.set_ylabel("v (m/s)")
+    _ax.set_title("Drag the red puck to inspect any point")
+    puck_fig = _fig
+    return (puck_fig,)
+
+
+@app.cell(hide_code=True)
+def _(ChartPuck, mo, puck_fig):
+    puck = mo.ui.anywidget(
+        ChartPuck(puck_fig, x=2.5, y=9.5, puck_color="#d62728", throttle=50)
+    )
+    puck
+    return (puck,)
+
+
+@app.cell(hide_code=True)
+def _(mo, puck):
+    mo.callout(f"Puck at t = {puck.x[0]:.2f} s, v = {puck.y[0]:.2f} m/s")
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ```python
+    fig, ax = plt.subplots()
+    ax.plot(t, v)   # any matplotlib chart, however it was built
+
+    puck = mo.ui.anywidget(ChartPuck(fig, x=2.5, y=9.5, puck_color="#d62728"))
+    puck
+    # in a later cell:
+    puck.x[0], puck.y[0]   # puck position, in the chart's own data coordinates (always a list — supports multiple pucks)
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 17. Auto-advancing slider — `PlaySlider`
+
+    A slider with a play/pause button that steps itself at a set interval —
+    turns "drag to see it change" into "press play and watch it happen".
+    Pairs naturally with the Altair dict-spec pattern: read `.value` each
+    tick and redraw a marker's position.
+
+    **Why reach for this:** motion topics (SUVAT, projectile motion) are
+    literally about something changing over time — animating that time
+    axis is often clearer than a student manually dragging through it.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(PlaySlider, mo):
+    play_t = mo.ui.anywidget(
+        PlaySlider(min_value=0, max_value=4, step=0.05, interval_ms=80, loop=True)
+    )
+    play_t
+    return (play_t,)
+
+
+@app.cell(hide_code=True)
+def _(alt, mo, np, pd, play_t):
+    _g = 9.8
+    _v0 = 20.0
+    _t_full = np.linspace(0, 4, 100)
+    _y_full = np.clip(_v0 * _t_full - 0.5 * _g * _t_full**2, 0, None)
+    _df = pd.DataFrame({"t": _t_full, "y": _y_full})
+
+    # NOTE: mo.ui.anywidget's own `.value` always returns *every* synced
+    # trait as a dict (marimo's generic anywidget contract) — it shadows
+    # the trait named "value" on the underlying widget instead of passing
+    # it through. Widgets in this file with a differently-named trait
+    # (TangleSlider.amount, Slider2D.x/.y, ChartPuck.x/.y) don't hit this;
+    # PlaySlider and CircularSlider do, so index into the dict explicitly.
+    _t_now = play_t.value["value"]
+    _y_now = max(0.0, _v0 * _t_now - 0.5 * _g * _t_now**2)
+
+    _spec = {
+        "layer": [
+            {
+                "data": {"values": _df.to_dict("records")},
+                "mark": {"type": "line", "color": "#1f77b4"},
+                "encoding": {
+                    "x": {"field": "t", "type": "quantitative", "title": "t (s)"},
+                    "y": {
+                        "field": "y",
+                        "type": "quantitative",
+                        "title": "height (m)",
+                        "scale": {"domain": [0, 22]},
+                    },
+                },
+            },
+            {
+                "data": {"values": [{"t": _t_now, "y": _y_now}]},
+                "mark": {"type": "point", "size": 150, "filled": True, "color": "#d62728"},
+                "encoding": {
+                    "x": {"field": "t", "type": "quantitative"},
+                    "y": {"field": "y", "type": "quantitative"},
+                },
+            },
+        ],
+        "width": 460,
+        "height": 280,
+    }
+    mo.center(alt.Chart.from_dict(_spec, validate=False))
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ```python
+    play_t = mo.ui.anywidget(PlaySlider(min_value=0, max_value=4, step=0.05, interval_ms=80, loop=True))
+    play_t
+    # in a later cell — mo.ui.anywidget's `.value` is always a dict of every
+    # synced trait (it shadows a trait literally named "value"), so index in:
+    play_t.value["value"]   # advances on its own once "play" is pressed, same reactivity as mo.ui.slider
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 18. Circular dial — `CircularSlider`
+
+    Same semantics as `mo.ui.slider` (`start`/`stop`/`step`/`value`), laid
+    out around a dial instead of a straight line. Worth it specifically
+    when the quantity being picked *is* an angle — dragging around a circle
+    reads more naturally than dragging along a line for something that
+    wraps around.
+
+    **Why reach for this:** launch angle in projectile motion, incline
+    angle, angle of a force vector — anywhere a straight `mo.ui.slider`
+    would otherwise be labelled "angle (°)".
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(CircularSlider, mo):
+    launch_angle = mo.ui.anywidget(
+        CircularSlider(start=0, stop=90, step=1, value=45, label="Launch angle (°)")
+    )
+    launch_angle
+    return (launch_angle,)
+
+
+@app.cell(hide_code=True)
+def _(launch_angle, mo, np):
+    _v0 = 25.0
+    _g = 9.8
+    # see the note in section 17 — mo.ui.anywidget's `.value` shadows a
+    # trait literally named "value" with a dict of every synced trait.
+    _angle = launch_angle.value["value"]
+    _theta = np.radians(_angle)
+    _range = (_v0**2) * np.sin(2 * _theta) / _g
+    _max_h = (_v0 * np.sin(_theta)) ** 2 / (2 * _g)
+    mo.callout(
+        f"At {_angle:.0f}°, launch speed 25 m/s → "
+        f"range = {_range:.1f} m, max height = {_max_h:.1f} m"
+    )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ```python
+    launch_angle = mo.ui.anywidget(CircularSlider(start=0, stop=90, step=1, value=45, label="Launch angle (°)"))
+    launch_angle
+    # in a later cell — mo.ui.anywidget's `.value` is always a dict of every
+    # synced trait (it shadows a trait literally named "value"), so index in:
+    launch_angle.value["value"]   # current angle, same as mo.ui.slider
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## 19. Select a region on a matplotlib chart — `mo.ui.matplotlib`
+
+    Built into marimo itself — **no extra dependency at all**, unlike
+    everything else in this file. Draw a box (click-drag) or freehand
+    lasso (Shift + drag) selection directly on a matplotlib `Axes`;
+    `.value.get_mask(x, y)` returns a boolean mask for any data you plot
+    against it.
+
+    **Why reach for this:** momentum-part2/momentum-part3 already teach
+    "area under a v–t graph = displacement" / "area under F–t = impulse"
+    by shading one fixed, pre-chosen interval. This lets the *student*
+    drag out their own interval and see the number update live — and
+    because it's first-party, it's the lowest-friction option in this
+    whole file.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(np, plt):
+    _t = np.linspace(0, 5, 60)
+    _v = 2 + 3 * _t
+    _fig, _ax = plt.subplots(figsize=(6, 4), dpi=150)
+    _ax.plot(_t, _v, color="#1f77b4")
+    _ax.scatter(_t, _v, s=10, color="#1f77b4")
+    _ax.set_xlabel("t (s)")
+    _ax.set_ylabel("v (m/s)")
+    _ax.set_title("Drag to select an interval")
+    select_axes = _ax
+    select_t, select_v = _t, _v
+    return select_axes, select_t, select_v
+
+
+@app.cell(hide_code=True)
+def _(mo, select_axes):
+    region = mo.ui.matplotlib(select_axes)
+    region
+    return (region,)
+
+
+@app.cell(hide_code=True)
+def _(mo, np, region, select_t, select_v):
+    if region.value:
+        _mask = region.value.get_mask(select_t, select_v)
+        _t_sel, _v_sel = select_t[_mask], select_v[_mask]
+        if len(_t_sel) >= 2:
+            _area = np.trapezoid(_v_sel, _t_sel)
+            _msg = (
+                f"{int(_mask.sum())} points selected, t = {_t_sel.min():.2f}"
+                f"–{_t_sel.max():.2f} s → area under curve ≈ {_area:.1f} m "
+                f"(displacement over that interval)"
+            )
+            _kind = "success"
+        else:
+            _msg = "Select at least two points to estimate an area."
+            _kind = "warn"
+    else:
+        _msg = "Drag a box (or Shift+drag for lasso) on the chart above to select an interval."
+        _kind = "neutral"
+    mo.callout(_msg, kind=_kind)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ```python
+    ax = mo.ui.matplotlib(plt.gca())   # or mo.ui.matplotlib(some_axes)
+    ax
+    # in a later cell:
+    if ax.value:
+        mask = ax.value.get_mask(x, y)   # boolean mask into your own x, y arrays
+        x[mask], y[mask]
+    ```
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     ## Summary — what to reach for
 
     | Widget | Package | Replaces / fits | Priority |
@@ -641,6 +1056,11 @@ def _(mo):
     | `Matrix` | wigglystuff | no current physics fit | Low |
     | `TextCompare` | wigglystuff | no current physics fit | Low |
     | `World` / `Color` (turtle) | marimo-learn | animated vector-addition or trajectory path | Stretch |
+    | Altair click-to-highlight (`params`/`condition`) | none — native Vega-Lite | reading an exact value off a dense line/scatter chart | High — free, no new dependency |
+    | `ChartPuck` | wigglystuff | matplotlib's version of "drag to inspect a point" (no Vega-Lite equivalent for matplotlib charts) | Medium — matplotlib charts only |
+    | `PlaySlider` | wigglystuff | manual dragging through a time axis (SUVAT/projectile motion animations) | High — motion topics |
+    | `CircularSlider` | wigglystuff | `mo.ui.slider` for any angle quantity (launch angle, incline angle) | High — projectile motion, forces |
+    | `mo.ui.matplotlib` | none — built into marimo | shading a fixed area-under-curve interval by hand (momentum-part2/3) | High — free, no new dependency |
 
     **Dependencies to add** wherever any of these are used:
     `pip install wigglystuff marimo-learn` (installs `anywidget` as a
