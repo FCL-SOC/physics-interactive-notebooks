@@ -128,6 +128,11 @@ def _(mo):
     A person of fixed mass is stopping in a car crash (fixed $\Delta v$). Drag
     the **collision-time** slider and watch the force change.
 
+    - **Left:** the grey rectangle is the crash with no airbag; the green one is
+      your collision. Both have the **same area**, the impulse $m\Delta v$, so
+      a wider rectangle has to be shorter.
+    - **Right:** force against collision time, for this impulse.
+
     **Predict first:** if you make the collision take twice as long, roughly what
     happens to the force?
     """)
@@ -139,7 +144,7 @@ def _(mo):
     dummy_mass = mo.ui.slider(start=30, stop=120, step=1, value=60, label="mass (kg)", debounce=True)
     dummy_dv = mo.ui.slider(start=1, stop=30, step=1, value=20, label="$\\Delta v$ (m/s)", debounce=True)
     collision_time = mo.ui.slider(
-        start=0.02, stop=1.0, step=0.02, value=0.1, label="collision time, $\\Delta t$ (s)", debounce=True
+        start=0.02, stop=1.0, step=0.02, value=0.5, label="collision time, $\\Delta t$ (s)", debounce=True
     )
     mo.hstack([dummy_mass, dummy_dv, collision_time], justify="start", gap=2)
     return collision_time, dummy_dv, dummy_mass
@@ -157,35 +162,58 @@ def _(collision_time, dummy_dv, dummy_mass, mo):
 
 @app.cell(hide_code=True)
 def _(alt, collision_time, dummy_dv, dummy_mass, mo, np):
-    _t_range = np.linspace(0.02, 1.0, 200)
-    _F_range = dummy_mass.value * dummy_dv.value / _t_range
-    _F_point = dummy_mass.value * dummy_dv.value / collision_time.value
+    _impulse = dummy_mass.value * dummy_dv.value
+    _t = collision_time.value
+    _F = _impulse / _t
+    _t_ref = 0.1  # the "no airbag" stopping time from the worked example
+    _F_ref = _impulse / _t_ref
+    _q = {"type": "quantitative"}
 
-    # Plain Vega-Lite spec dict, not chained Altair calls — see
-    # momentum-part1 for why (chained calls are much slower to rebuild
-    # on every slider move).
-    _pts = [{"x": float(_t), "y": float(_f)} for _t, _f in zip(_t_range, _F_range)]
-    _x_enc = {"field": "x", "type": "quantitative", "title": "collision time, Δt (s)",
-               "scale": {"domain": [0.02, 1.0]}, "axis": {"grid": False}}
-    _y_enc = {"field": "y", "type": "quantitative", "title": "force experienced, F (N)",
-               "scale": {"domain": [0, 175000]}, "axis": {"grid": False}}
-    fig3 = alt.Chart.from_dict(
-        {
-            "data": {"values": _pts},
-            "layer": [
-                {"mark": {"type": "line", "color": "#2ca02c", "strokeWidth": 2},
-                 "encoding": {"x": _x_enc, "y": _y_enc}},
-                {"data": {"values": [{"x": collision_time.value, "y": _F_point}]},
-                 "mark": {"type": "point", "color": "#d62728", "size": 70, "filled": True},
-                 "encoding": {"x": {"field": "x", "type": "quantitative"},
-                              "y": {"field": "y", "type": "quantitative"}}},
-            ],
-            "width": 480,
-            "height": 320,
-            "title": "Longer collision time → smaller force, for fixed mΔv",
-        },
-        validate=False,
-    )
+    # Left: same impulse as two force-time rectangles of equal area.
+    # Plain Vega-Lite dicts, not chained Altair calls (see momentum-part1).
+    _rects = [
+        {"case": f"no airbag (Δt = {_t_ref} s)", "t": _t_ref, "F": _F_ref},
+        {"case": f"your collision (Δt = {_t:.2f} s)", "t": _t, "F": _F},
+    ]
+    _color = {"field": "case", "type": "nominal", "sort": None,
+              "scale": {"range": ["#969696", "#2ca02c"]},
+              "legend": {"orient": "top", "title": None}}
+    _ft = {
+        "data": {"values": _rects},
+        "layer": [
+            {"mark": {"type": "rect", "fillOpacity": 0.3, "strokeWidth": 2},
+             "transform": [{"calculate": "0", "as": "zero"}],
+             "encoding": {
+                 "x": {"field": "zero", **_q, "title": "time, t (s)", "scale": {"domain": [0, 1.0]}},
+                 "x2": {"field": "t"},
+                 "y": {"field": "zero", **_q, "title": "force, F (N)",
+                       "scale": {"domain": [0, max(_F, _F_ref) * 1.1]}},
+                 "y2": {"field": "F"},
+                 "color": _color, "stroke": _color}},
+        ],
+        "width": 300, "height": 280,
+        "title": f"Same area (impulse = {_impulse:,} kg m/s)",
+    }
+
+    # Right: F against Δt for this impulse, with the current point marked.
+    _t_range = np.linspace(0.02, 1.0, 200)
+    _curve = [{"x": float(_x), "y": float(_impulse / _x)} for _x in _t_range]
+    _x_enc = {"field": "x", **_q, "title": "collision time, Δt (s)", "scale": {"domain": [0, 1.0]}}
+    _y_enc = {"field": "y", **_q, "title": "force, F (N)",
+              "scale": {"domain": [0, _impulse / 0.02 * 1.05]}}
+    _curve_chart = {
+        "layer": [
+            {"data": {"values": _curve},
+             "mark": {"type": "line", "color": "#2ca02c", "strokeWidth": 2, "clip": True},
+             "encoding": {"x": _x_enc, "y": _y_enc}},
+            {"data": {"values": [{"x": _t, "y": _F}]},
+             "mark": {"type": "point", "color": "#2ca02c", "size": 80, "filled": True},
+             "encoding": {"x": _x_enc, "y": _y_enc}},
+        ],
+        "width": 300, "height": 280,
+        "title": "F = mΔv / Δt",
+    }
+    fig3 = alt.Chart.from_dict({"hconcat": [_ft, _curve_chart]}, validate=False)
     mo.center(fig3)
     return
 

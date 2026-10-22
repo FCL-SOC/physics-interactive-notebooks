@@ -474,9 +474,10 @@ def _(MatchingWidget, mo):
     impulse_unit_match = mo.ui.anywidget(
         MatchingWidget(
             question="Match each quantity to its SI unit:",
-            left=["Force, F", "Impulse, J", "Momentum, p"],
-            right=["N", "N·s", "kg m s⁻¹"],
-            correct_matches={0: 0, 1: 1, 2: 2},
+            left=["Force, F", "Impulse, J", "Time interval, Δt"],
+            # MatchingWidget doesn't shuffle, so scramble right by hand.
+            right=["s", "N", "N·s"],
+            correct_matches={0: 1, 1: 2, 2: 0},
         )
     )
     impulse_unit_match

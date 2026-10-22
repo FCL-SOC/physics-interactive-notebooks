@@ -35,22 +35,27 @@ def _():
 
 
 @app.function(hide_code=True)
-def bar_group(labels, values, colors, ylim, ylabel, title):
+def before_after_bars(rows, items, colors, domain, ylabel, title, width=230):
     # Plain Vega-Lite spec dict, not chained Altair calls — see
     # momentum-part1 for why (chained calls are much slower to rebuild
-    # on every slider move). One bar chart with N labelled bars.
-    _pts = [{"label": _l, "value": _v} for _l, _v in zip(labels, values)]
+    # on every slider move). Before and After sit side by side on ONE
+    # shared y axis, with a bar per item inside each, so the eye can
+    # compare totals directly. rows: [{"stage", "item", "value"}].
+    _color = {"field": "item", "type": "nominal",
+              "scale": {"domain": items, "range": colors},
+              "legend": {"orient": "top", "title": None}}
     return {
-        "data": {"values": _pts},
+        "data": {"values": rows},
         "layer": [
             {
                 "mark": {"type": "bar", "stroke": "black", "strokeWidth": 0.6},
                 "encoding": {
-                    "x": {"field": "label", "type": "nominal", "title": None, "sort": None},
+                    "x": {"field": "stage", "type": "nominal", "title": None,
+                          "sort": ["Before", "After"], "axis": {"labelAngle": 0}},
+                    "xOffset": {"field": "item", "sort": items},
                     "y": {"field": "value", "type": "quantitative", "title": ylabel,
-                          "scale": {"domain": [-ylim, ylim]}},
-                    "color": {"field": "label", "type": "nominal",
-                              "scale": {"domain": labels, "range": colors}, "legend": None},
+                          "scale": {"domain": list(domain)}},
+                    "color": _color,
                 },
             },
             {
@@ -59,7 +64,7 @@ def bar_group(labels, values, colors, ylim, ylabel, title):
                 "encoding": {"y": {"field": "y", "type": "quantitative"}},
             },
         ],
-        "width": 260,
+        "width": width,
         "height": 260,
         "title": title,
     }
@@ -160,8 +165,8 @@ def _(mo):
     ## Explore it: the collision simulator
 
     Choose each object's mass and initial velocity (positive = right, negative =
-    left) and a collision type. The bar charts show the velocities and momenta
-    before and after.
+    left) and a collision type. The bar charts show the velocities, momenta
+    and total kinetic energy before and after, on shared axes.
 
     **Predict first:** compare the two "total momentum" bars (before and after).
     What do you expect to see?
@@ -171,9 +176,9 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    m1_slider = mo.ui.slider(start=1, stop=2000, step=10, value=1000, label="$m_1$ (kg)", debounce=True)
+    m1_slider = mo.ui.slider(start=10, stop=2000, step=10, value=1000, label="$m_1$ (kg)", debounce=True)
     u1_slider = mo.ui.slider(start=-20, stop=20, step=0.5, value=10, label="$u_1$ (m/s)", debounce=True)
-    m2_slider = mo.ui.slider(start=1, stop=2000, step=10, value=1000, label="$m_2$ (kg)", debounce=True)
+    m2_slider = mo.ui.slider(start=10, stop=2000, step=10, value=1000, label="$m_2$ (kg)", debounce=True)
     u2_slider = mo.ui.slider(start=-20, stop=20, step=0.5, value=0, label="$u_2$ (m/s)", debounce=True)
     collision_type = mo.ui.radio(
         options=["Perfectly inelastic (stick together)", "Elastic (bounce apart)"],
@@ -197,71 +202,71 @@ def _(collision_type, m1_slider, m2_slider, mo, u1_slider, u2_slider):
     _p_before = _m1 * _u1 + _m2 * _u2
 
     if collision_type.value.startswith("Perfectly"):
-        _v_common = _p_before / (_m1 + _m2)
-        _v1, _v2 = _v_common, _v_common
+        v1_after = v2_after = _p_before / (_m1 + _m2)
     else:
-        _v1 = ((_m1 - _m2) / (_m1 + _m2)) * _u1 + (2 * _m2 / (_m1 + _m2)) * _u2
-        _v2 = (2 * _m1 / (_m1 + _m2)) * _u1 + ((_m2 - _m1) / (_m1 + _m2)) * _u2
+        v1_after = ((_m1 - _m2) / (_m1 + _m2)) * _u1 + (2 * _m2 / (_m1 + _m2)) * _u2
+        v2_after = (2 * _m1 / (_m1 + _m2)) * _u1 + ((_m2 - _m1) / (_m1 + _m2)) * _u2
 
-    _p_after = _m1 * _v1 + _m2 * _v2
+    _p_after = _m1 * v1_after + _m2 * v2_after
 
     mo.md(
         f"""
         **Before:** $p = m_1u_1 + m_2u_2 = ({_m1})({_u1}) + ({_m2})({_u2}) = {_p_before:,.1f}$ kg m/s
 
-        **After:** $v_1 = {_v1:,.2f}$ m/s, $v_2 = {_v2:,.2f}$ m/s
+        **After:** $v_1 = {v1_after:,.2f}$ m/s, $v_2 = {v2_after:,.2f}$ m/s
         &nbsp;&nbsp;→&nbsp;&nbsp; $p = {_p_after:,.1f}$ kg m/s
 
         Momentum is conserved.
         """
     )
-    return
+    return v1_after, v2_after
 
 
 @app.cell(hide_code=True)
-def _(alt, collision_type, m1_slider, m2_slider, mo, u1_slider, u2_slider):
+def _(alt, m1_slider, m2_slider, mo, u1_slider, u2_slider, v1_after, v2_after):
     _m1, _m2 = m1_slider.value, m2_slider.value
     _u1, _u2 = u1_slider.value, u2_slider.value
-    _p_before = _m1 * _u1 + _m2 * _u2
+    _v1, _v2 = v1_after, v2_after
 
-    if collision_type.value.startswith("Perfectly"):
-        _v_common = _p_before / (_m1 + _m2)
-        _v1, _v2 = _v_common, _v_common
-    else:
-        _v1 = ((_m1 - _m2) / (_m1 + _m2)) * _u1 + (2 * _m2 / (_m1 + _m2)) * _u2
-        _v2 = (2 * _m1 / (_m1 + _m2)) * _u1 + ((_m2 - _m1) / (_m1 + _m2)) * _u2
+    _vel = [
+        {"stage": "Before", "item": "object 1", "value": _u1},
+        {"stage": "Before", "item": "object 2", "value": _u2},
+        {"stage": "After", "item": "object 1", "value": _v1},
+        {"stage": "After", "item": "object 2", "value": _v2},
+    ]
+    _mom = []
+    for _stage, _a, _b in [("Before", _m1 * _u1, _m2 * _u2), ("After", _m1 * _v1, _m2 * _v2)]:
+        _mom += [
+            {"stage": _stage, "item": "object 1", "value": _a},
+            {"stage": _stage, "item": "object 2", "value": _b},
+            {"stage": _stage, "item": "total", "value": _a + _b},
+        ]
+    _ke = [
+        {"stage": "Before", "item": "total", "value": 0.5 * _m1 * _u1**2 + 0.5 * _m2 * _u2**2},
+        {"stage": "After", "item": "total", "value": 0.5 * _m1 * _v1**2 + 0.5 * _m2 * _v2**2},
+    ]
 
-    _p1_before = _m1 * _u1
-    _p2_before = _m2 * _u2
-    _pt_before = _p1_before + _p2_before
-    _p1_after = _m1 * _v1
-    _p2_after = _m2 * _v2
-    _pt_after = _p1_after + _p2_after
+    # Axes sized to fit: elastic collisions reach ~40 m/s and 80 000 kg m/s
+    # at the slider extremes.
+    _ylim_v = max(22, *(abs(_r["value"]) for _r in _vel)) * 1.05
+    _ylim_p = max(42000, *(abs(_r["value"]) for _r in _mom)) * 1.05
+    _ylim_k = max(1000, *(_r["value"] for _r in _ke)) * 1.1
 
-    _labels = ["object 1", "object 2"]
-    _labels1 = ["object 1", "object 2", "total"]
-    _colors = ["#1f77b4", "#d62728"]
-    _colors1 = ["#1f77b4", "#d62728", "#ff7f0e"]
-    _ylim_v = 22
-    _ylim_p = 42000
-
-    _panel_a = bar_group(_labels, [_u1, _u2], _colors, _ylim_v, "Velocity (m/s)", "Velocities Before")
-    _panel_b = bar_group(_labels, [_v1, _v2], _colors, _ylim_v, "Velocity (m/s)", "Velocities After")
-    _panel_c = bar_group(_labels1, [_p1_before, _p2_before, _pt_before], _colors1, _ylim_p, "Momentum (kg·m/s)", "Momentum Before")
-    _panel_d = bar_group(_labels1, [_p1_after, _p2_after, _pt_after], _colors1, _ylim_p, "Momentum (kg·m/s)", "Momentum After")
-
+    _objects = ["object 1", "object 2"]
+    _blue_red = ["#2171b5", "#cb181d"]
     fig4 = alt.Chart.from_dict(
         {
-            "vconcat": [
-                {"hconcat": [_panel_a, _panel_b]},
-                {"hconcat": [_panel_c, _panel_d]},
+            "hconcat": [
+                before_after_bars(_vel, _objects, _blue_red, (-_ylim_v, _ylim_v),
+                                  "Velocity (m/s)", "Velocity"),
+                before_after_bars(_mom, _objects + ["total"], _blue_red + ["#525252"],
+                                  (-_ylim_p, _ylim_p), "Momentum (kg·m/s)", "Momentum"),
+                before_after_bars(_ke, ["total"], ["#ff7f0e"], (0, _ylim_k),
+                                  "Kinetic energy (J)", "Total kinetic energy", width=140),
             ],
-            # Without this, Vega-Lite tries to share one colour scale
-            # across all 4 panels — since panel A only has 2 categories
-            # (object 1/2) but panel C has 3 (+ total), the shared scale
-            # silently mis-colours the "total" bar. Each panel needs its
-            # own colour mapping.
-            "resolve": {"scale": {"color": "independent"}},
+            # Each panel has its own colour and bar-offset mapping (2, 3 and 1
+            # categories); shared scales mis-colour and mis-order the bars.
+            "resolve": {"scale": {"color": "independent", "xOffset": "independent"}},
         },
         validate=False,
     )

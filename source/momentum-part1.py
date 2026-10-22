@@ -142,7 +142,9 @@ def _(mo):
     ## Explore it: the momentum graph
 
     Below are two balls. Drag the sliders to change each ball's mass and
-    velocity, and watch how the momentum bar changes.
+    velocity. Each ball is drawn as a rectangle: its **width** is the mass,
+    its **height** is the velocity, so its **area** is the momentum, $p = mv$.
+    A rectangle below the axis has negative velocity, so negative momentum.
 
     **Before you touch the sliders, predict:** if you double a ball's velocity,
     what happens to its momentum?
@@ -165,7 +167,7 @@ def _(mo):
         debounce=True,
     )
     velocity_slider2 = mo.ui.slider(
-        start=-38, stop=38, step=1, value=10, label="Ball 2 velocity, $v$ (m/s)",
+        start=-20, stop=20, step=1, value=10, label="Ball 2 velocity, $v$ (m/s)",
         debounce=True,
     )
 
@@ -198,36 +200,39 @@ def _(mass_slider1, mass_slider2, mo, velocity_slider1, velocity_slider2):
 
 @app.cell(hide_code=True)
 def _(alt, mass_slider1, mass_slider2, velocity_slider1, velocity_slider2):
-    _m1 = mass_slider1.value
-    _v1 = velocity_slider1.value
-    _p1 = _m1 * _v1
-
-    _m2 = mass_slider2.value
-    _v2 = velocity_slider2.value
-    _p2 = _m2 * _v2
-
-    # Ball 1 uses graded shades of red, Ball 2 graded shades of blue.
-    # Within each ball the shade darkens from mass -> velocity -> momentum.
-    _reds = ["#fcae91", "#fb6a4a", "#cb181d"]
-    _blues = ["#bdd7e7", "#6baed6", "#2171b5"]
-
-    def _panel(label, value, color, ylim, unit, title=None, title_color=None):
-        # Built as a plain Vega-Lite spec dict rather than chained Altair
-        # calls: each .mark_x()/.encode()/.properties() call deep-copies
-        # the whole chart internally, which made this cell's rebuild (18
-        # such objects) take ~500ms per slider move. A dict + from_dict(
-        # validate=False) skips that entirely — same output, ~50x faster.
-        _spec = {
-            "data": {"values": [{"label": label, "value": value}]},
+    # p = mv drawn as a rectangle: width m, height v, area p. Both balls share
+    # one set of axes, so equal momenta show up as different shapes with the
+    # same area. Plain Vega-Lite dict + from_dict(validate=False): chained
+    # Altair calls deep-copy on every call and made slider moves ~50x slower.
+    _rows = []
+    for _ball, _m, _v in [
+        ("Ball 1", mass_slider1.value, velocity_slider1.value),
+        ("Ball 2", mass_slider2.value, velocity_slider2.value),
+    ]:
+        _rows.append({
+            "ball": _ball, "x0": 0, "y0": 0, "m": _m, "v": _v,
+            # Label sits just inside the rectangle's far corner.
+            "ylab": _v - 1.2 if _v >= 0 else _v + 1.2,
+            "label": f"p = {_m * _v:,.0f} kg m/s",
+        })
+    _color = {"field": "ball", "type": "nominal",
+              "scale": {"domain": ["Ball 1", "Ball 2"], "range": ["#2171b5", "#cb181d"]},
+              "legend": {"orient": "top", "title": None}}
+    fig1 = alt.Chart.from_dict(
+        {
+            "data": {"values": _rows},
             "layer": [
                 {
-                    "mark": {"type": "bar", "color": color, "stroke": "black", "strokeWidth": 0.6},
+                    "mark": {"type": "rect", "fillOpacity": 0.3, "strokeWidth": 2},
                     "encoding": {
-                        "x": {"field": "label", "type": "nominal", "title": None,
-                              "axis": {"labels": False, "ticks": False}},
-                        "y": {"field": "value", "type": "quantitative",
-                              "title": f"{label} ({unit})",
-                              "scale": {"domain": [-ylim, ylim]}},
+                        "x": {"field": "x0", "type": "quantitative", "title": "mass, m (kg)",
+                              "scale": {"domain": [0, 32]}},
+                        "x2": {"field": "m"},
+                        "y": {"field": "y0", "type": "quantitative", "title": "velocity, v (m/s)",
+                              "scale": {"domain": [-22, 22]}},
+                        "y2": {"field": "v"},
+                        "color": _color,
+                        "stroke": _color,
                     },
                 },
                 {
@@ -236,43 +241,20 @@ def _(alt, mass_slider1, mass_slider2, velocity_slider1, velocity_slider2):
                     "encoding": {"y": {"field": "y", "type": "quantitative"}},
                 },
                 {
-                    # Value label on the bar so meaning does not rely on colour alone.
-                    "mark": {"type": "text", "align": "center",
-                             "baseline": "bottom" if value >= 0 else "top",
-                             "dy": -6 if value >= 0 else 6,
+                    "mark": {"type": "text", "align": "right", "dx": -4,
                              "fontWeight": "bold", "fontSize": 11},
                     "encoding": {
-                        "x": {"field": "label", "type": "nominal", "axis": None},
-                        "y": {"field": "value", "type": "quantitative"},
-                        "text": {"field": "value", "type": "quantitative", "format": ",.0f"},
+                        "x": {"field": "m", "type": "quantitative"},
+                        "y": {"field": "ylab", "type": "quantitative"},
+                        "text": {"field": "label"},
+                        "color": {**_color, "legend": None},
                     },
                 },
             ],
-            "width": 110,
-            "height": 180,
-        }
-        if title:
-            _spec["title"] = {"text": title, "color": title_color, "fontSize": 13, "fontWeight": "bold"}
-        return _spec
-
-    # Row 1: Ball 1, row 2: Ball 2 — matches the original panel-grid layout.
-    _row1 = {
-        "hconcat": [
-            _panel("Mass", _m1, _reds[0], 33, "kg"),
-            _panel("Velocity", _v1, _reds[1], 40, "m/s", title="Ball 1", title_color="#cb181d"),
-            _panel("Momentum", _p1, _reds[2], 800, "kg m/s"),
-        ]
-    }
-    _row2 = {
-        "hconcat": [
-            _panel("Mass", _m2, _blues[0], 33, "kg"),
-            _panel("Velocity", _v2, _blues[1], 40, "m/s", title="Ball 2", title_color="#2171b5"),
-            _panel("Momentum", _p2, _blues[2], 800, "kg m/s"),
-        ]
-    }
-
-    fig1 = alt.Chart.from_dict(
-        {"vconcat": [_row1, _row2], "config": {"view": {"strokeWidth": 0}}},
+            "width": 440,
+            "height": 320,
+            "title": "Momentum = area of the rectangle (width m × height v)",
+        },
         validate=False,
     )
     fig1
@@ -439,8 +421,9 @@ def _(MatchingWidget, mo):
         MatchingWidget(
             question="Match each quantity to its SI unit:",
             left=["Momentum, p", "Mass, m", "Velocity, v"],
-            right=["kg m s⁻¹", "kg", "m s⁻¹"],
-            correct_matches={0: 0, 1: 1, 2: 2},
+            # MatchingWidget doesn't shuffle, so scramble right by hand.
+            right=["m s⁻¹", "kg m s⁻¹", "kg"],
+            correct_matches={0: 1, 1: 2, 2: 0},
         )
     )
     unit_match

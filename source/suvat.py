@@ -51,11 +51,12 @@ def line_chart(
         _fill_pts = [{"x": float(_x), "y": float(_y)} for _x, _y in zip(_fill_x, _fill_y)]
         _layers.append({
             "data": {"values": _fill_pts},
-            "mark": {"type": "area", "color": color, "opacity": 0.3},
+            "mark": {"type": "area", "color": color, "opacity": 0.3, "clip": True},
             "encoding": {"x": _x_enc, "y": _y_enc},
         })
     _layers.append({
-        "mark": {"type": "line", "color": color, "strokeWidth": 2},
+        # clip: slider extremes push lines past the fixed axes otherwise.
+        "mark": {"type": "line", "color": color, "strokeWidth": 2, "clip": True},
         "encoding": {"x": _x_enc, "y": _y_enc},
     })
     _layers.append({
@@ -77,7 +78,7 @@ def line_chart(
     if scatter:
         _layers.append({
             "data": {"values": [{"x": scatter[0], "y": scatter[1]}]},
-            "mark": {"type": "point", "color": scatter_color, "size": 70, "filled": True},
+            "mark": {"type": "point", "color": scatter_color, "size": 70, "filled": True, "clip": True},
             "encoding": {
                 "x": {"field": "x", "type": "quantitative"},
                 "y": {"field": "y", "type": "quantitative"},
@@ -153,9 +154,18 @@ def _(mo):
     This is wrong, a deceleration is a negative acceleration in the direction of travel. The correct substitution is $a = -4$, giving $v = 20 + (-4)(3) = 8$ m/s. Always assign a sign to $a$ based on whether the object speeds up or slows down relative to its direction of motion.
 
     ### View the Graph Below
-    Adjust the initial velocity and acceleration below and see how the final velocity changes over time. The gradient of the line is the acceleration.
+    Adjust the initial velocity and acceleration and see how the final velocity changes over time. The gradient of the line is the acceleration.
     """)
     return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    u_slider1 = mo.ui.slider(start=-20, stop=30, step=1, value=0, label="initial velocity, $u$ (m/s)", debounce=True)
+    a_slider1 = mo.ui.slider(start=-10, stop=10, step=0.5, value=2, label="acceleration, $a$ (m/s²)", debounce=True)
+    t_slider1 = mo.ui.slider(start=0, stop=10, step=0.5, value=5, label="time, $t$ (s)", debounce=True)
+    mo.hstack([u_slider1, a_slider1, t_slider1], justify="start", gap=2)
+    return a_slider1, t_slider1, u_slider1
 
 
 @app.cell(hide_code=True)
@@ -184,15 +194,6 @@ def _(a_slider1, mo, t_slider1, u_slider1):
         f"$v = u + at = {u_slider1.value} + ({a_slider1.value})({t_slider1.value}) = {_v:,.1f}$ m/s"
     )
     return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    u_slider1 = mo.ui.slider(start=-20, stop=30, step=1, value=0, label="initial velocity, $u$ (m/s)", debounce=True)
-    a_slider1 = mo.ui.slider(start=-10, stop=10, step=0.5, value=2, label="acceleration, $a$ (m/s²)", debounce=True)
-    t_slider1 = mo.ui.slider(start=0, stop=10, step=0.5, value=5, label="time, $t$ (s)", debounce=True)
-    mo.hstack([u_slider1, a_slider1, t_slider1], justify="start", gap=2)
-    return a_slider1, t_slider1, u_slider1
 
 
 @app.cell(hide_code=True)
@@ -272,26 +273,56 @@ def _(mo):
     This is wrong, the time term in the second part of the equation is **squared** ($t^2$), not $t$. Forgetting to square $t$ under-counts the contribution of acceleration, which grows quadratically, not linearly, with time.
 
     ### View the Graph Below
-    Adjust the initial velocity, acceleration, and time below. The shaded area under the v-t graph is the displacement, $s$.
+    Adjust the initial velocity, acceleration, and time. The shaded area under the v-t graph is the displacement, $s$. The s-t graph underneath plots that same displacement: the height of its dot is the shaded area above it. Notice the s-t graph curves, because $s$ depends on $t^2$.
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(a_slider2, alt, mo, np, t_slider2, u_slider2):
-    _t_range = np.linspace(0, 10, 200)
-    _v_range = u_slider2.value + a_slider2.value * _t_range
-    _t_fill = np.linspace(0, t_slider2.value, 100)
-    _v_fill = u_slider2.value + a_slider2.value * _t_fill
+def _(mo):
+    u_slider2 = mo.ui.slider(start=0, stop=20, step=1, value=5, label="initial velocity, $u$ (m/s)", debounce=True)
+    a_slider2 = mo.ui.slider(start=-5, stop=5, step=0.5, value=2, label="acceleration, $a$ (m/s²)", debounce=True)
+    t_slider2 = mo.ui.slider(start=0, stop=10, step=0.5, value=3, label="time, $t$ (s)", debounce=True)
+    mo.hstack([u_slider2, a_slider2, t_slider2], justify="start", gap=2)
+    return a_slider2, t_slider2, u_slider2
 
+
+@app.cell(hide_code=True)
+def _(a_slider2, alt, mo, np, t_slider2, u_slider2):
+    _u, _a, _t = u_slider2.value, a_slider2.value, t_slider2.value
+    _t_range = np.linspace(0, 10, 200)
+    _v_range = _u + _a * _t_range
+    _t_fill = np.linspace(0, _t, 100)
+    _v_fill = _u + _a * _t_fill
+    _s_range = _u * _t_range + 0.5 * _a * _t_range**2
+    _s = _u * _t + 0.5 * _a * _t**2
+    # s-t axis fits the whole curve, so it only rescales when u or a change,
+    # not as t moves the dot along it.
+    _s_lo, _s_hi = min(_s_range.min(), 0), max(_s_range.max(), 10)
+    _pad = 0.1 * (_s_hi - _s_lo)
+
+    # Stacked on a shared time axis: the shaded area up to t on the v-t
+    # graph equals the height of the dot on the s-t graph.
     fig2 = alt.Chart.from_dict(
-        line_chart(
-            _t_range, _v_range, "#1f77b4",
-            xlim=(0, 10), ylim=(-20, 60),
-            xlabel="time, t (s)", ylabel="velocity, v (m/s)",
-            title="Area under a v-t graph = displacement",
-            fill=True, fill_label="area = s", fill_x=_t_fill, fill_y=_v_fill,
-        ),
+        {
+            "vconcat": [
+                line_chart(
+                    _t_range, _v_range, "#1f77b4",
+                    xlim=(0, 10), ylim=(-20, 60),
+                    xlabel="time, t (s)", ylabel="velocity, v (m/s)",
+                    title="v-t graph: shaded area = displacement",
+                    fill=True, fill_label="area = s", fill_x=_t_fill, fill_y=_v_fill,
+                    height=220,
+                ),
+                line_chart(
+                    _t_range, _s_range, "#ff7f0e",
+                    xlim=(0, 10), ylim=(_s_lo - _pad, _s_hi + _pad),
+                    xlabel="time, t (s)", ylabel="displacement, s (m)",
+                    title=f"s-t graph: height of the dot = {_s:,.1f} m",
+                    scatter=(_t, _s), height=220,
+                ),
+            ]
+        },
         validate=False,
     )
     mo.center(fig2)
@@ -306,15 +337,6 @@ def _(a_slider2, mo, t_slider2, u_slider2):
         f"\\frac{{1}}{{2}}({a_slider2.value})({t_slider2.value})^2 = {_s:,.1f}$ m"
     )
     return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    u_slider2 = mo.ui.slider(start=0, stop=20, step=1, value=5, label="initial velocity, $u$ (m/s)", debounce=True)
-    a_slider2 = mo.ui.slider(start=-5, stop=5, step=0.5, value=2, label="acceleration, $a$ (m/s²)", debounce=True)
-    t_slider2 = mo.ui.slider(start=0, stop=10, step=0.5, value=3, label="time, $t$ (s)", debounce=True)
-    mo.hstack([u_slider2, a_slider2, t_slider2], justify="start", gap=2)
-    return a_slider2, t_slider2, u_slider2
 
 
 @app.cell(hide_code=True)
@@ -394,9 +416,18 @@ def _(mo):
     This is wrong on two counts. First, you cannot leave the answer as $v^2$, take the square root to get $v$. Second, and more importantly, a negative result under the square root means the situation described is impossible, the train would have already stopped before reaching 50 m. Always check that your answer makes physical sense before (and after) taking the square root.
 
     ### View the Graph Below
-    Adjust the initial velocity, acceleration, and distance below to see how $v^2$ changes with $s$. This relationship is a straight line, with gradient $2a$ and $v^2$-intercept $u^2$.
+    Adjust the initial velocity, acceleration, and distance to see how $v^2$ changes with $s$. This relationship is a straight line, with gradient $2a$ and $v^2$-intercept $u^2$.
     """)
     return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    u_slider3 = mo.ui.slider(start=0, stop=30, step=1, value=10, label="initial velocity, $u$ (m/s)", debounce=True)
+    a_slider3 = mo.ui.slider(start=-10, stop=10, step=0.5, value=3, label="acceleration, $a$ (m/s²)", debounce=True)
+    s_slider3 = mo.ui.slider(start=0, stop=100, step=1, value=40, label="displacement, $s$ (m)", debounce=True)
+    mo.hstack([u_slider3, a_slider3, s_slider3], justify="start", gap=2)
+    return a_slider3, s_slider3, u_slider3
 
 
 @app.cell(hide_code=True)
@@ -434,15 +465,6 @@ def _(a_slider3, mo, s_slider3, u_slider3):
 
 @app.cell(hide_code=True)
 def _(mo):
-    u_slider3 = mo.ui.slider(start=0, stop=30, step=1, value=10, label="initial velocity, $u$ (m/s)", debounce=True)
-    a_slider3 = mo.ui.slider(start=-10, stop=10, step=0.5, value=3, label="acceleration, $a$ (m/s²)", debounce=True)
-    s_slider3 = mo.ui.slider(start=0, stop=100, step=1, value=40, label="displacement, $s$ (m)", debounce=True)
-    mo.hstack([u_slider3, a_slider3, s_slider3], justify="start", gap=2)
-    return a_slider3, s_slider3, u_slider3
-
-
-@app.cell(hide_code=True)
-def _(mo):
     mo.md(r"""
     ### Checkpoint 3
 
@@ -457,8 +479,9 @@ def _(MatchingWidget, mo):
         MatchingWidget(
             question="Match each SUVAT equation to the variable it omits:",
             left=["v = u + at", "s = ut + ½at²", "v² = u² + 2as", "s = ½(u+v)t", "s = vt − ½at²"],
-            right=["s", "v", "t", "a", "u"],
-            correct_matches={0: 0, 1: 1, 2: 2, 3: 3, 4: 4},
+            # MatchingWidget doesn't shuffle, so scramble right by hand.
+            right=["t", "a", "s", "u", "v"],
+            correct_matches={0: 2, 1: 4, 2: 0, 3: 1, 4: 3},
         )
     )
     equation_match
@@ -517,9 +540,18 @@ def _(mo):
     This isn't necessarily wrong, but it's a common source of confusion: this equation gives **displacement**, not distance travelled. An average velocity of zero means the object ends up back where it started (net displacement of zero), even though it may have travelled a large distance in each direction. Always be clear on whether a question asks for displacement or distance.
 
     ### View the Graph Below
-    Adjust the initial velocity, final velocity, and time below. The shaded trapezoid area equals the shaded rectangle area, both represent the same displacement, $s$.
+    Adjust the initial velocity, final velocity, and time. The shaded trapezoid area equals the shaded rectangle area, both represent the same displacement, $s$.
     """)
     return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    u_slider4 = mo.ui.slider(start=-20, stop=20, step=1, value=4, label="initial velocity, $u$ (m/s)", debounce=True)
+    v_slider4 = mo.ui.slider(start=-20, stop=20, step=1, value=16, label="final velocity, $v$ (m/s)", debounce=True)
+    t_slider4 = mo.ui.slider(start=0.5, stop=10, step=0.5, value=6, label="time, $t$ (s)", debounce=True)
+    mo.hstack([u_slider4, v_slider4, t_slider4], justify="start", gap=2)
+    return t_slider4, u_slider4, v_slider4
 
 
 @app.cell(hide_code=True)
@@ -556,15 +588,6 @@ def _(mo, t_slider4, u_slider4, v_slider4):
         f"$s = \\frac{{1}}{{2}}(u+v)t = \\frac{{1}}{{2}}({u_slider4.value} + {v_slider4.value})({t_slider4.value}) = {_s:,.1f}$ m"
     )
     return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    u_slider4 = mo.ui.slider(start=-20, stop=20, step=1, value=4, label="initial velocity, $u$ (m/s)", debounce=True)
-    v_slider4 = mo.ui.slider(start=-20, stop=20, step=1, value=16, label="final velocity, $v$ (m/s)", debounce=True)
-    t_slider4 = mo.ui.slider(start=0.5, stop=10, step=0.5, value=6, label="time, $t$ (s)", debounce=True)
-    mo.hstack([u_slider4, v_slider4, t_slider4], justify="start", gap=2)
-    return t_slider4, u_slider4, v_slider4
 
 
 @app.cell(hide_code=True)
@@ -647,9 +670,18 @@ def _(mo):
     This is wrong, this equation specifically uses the **final** velocity $v$, not the initial velocity $u$. It looks structurally similar to $s = ut + \frac{1}{2}at^2$, but the sign in front of the acceleration term is negative and the velocity used is the one at the **end** of the interval. Mixing up $u$ and $v$ between these two equations is one of the most common SUVAT errors.
 
     ### View the Graph Below
-    Adjust the final velocity, acceleration, and time below. The shaded area under the graph, ending at the chosen final velocity, is the displacement, $s$.
+    Adjust the final velocity, acceleration, and time. The shaded area under the graph, ending at the chosen final velocity, is the displacement, $s$.
     """)
     return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    v_slider5 = mo.ui.slider(start=0, stop=40, step=1, value=25, label="final velocity, $v$ (m/s)", debounce=True)
+    a_slider5 = mo.ui.slider(start=-10, stop=10, step=0.5, value=-4, label="acceleration, $a$ (m/s²)", debounce=True)
+    t_slider5 = mo.ui.slider(start=0.5, stop=10, step=0.5, value=3, label="time, $t$ (s)", debounce=True)
+    mo.hstack([v_slider5, a_slider5, t_slider5], justify="start", gap=2)
+    return a_slider5, t_slider5, v_slider5
 
 
 @app.cell(hide_code=True)
@@ -682,15 +714,6 @@ def _(a_slider5, mo, t_slider5, v_slider5):
         f"\\frac{{1}}{{2}}({a_slider5.value})({t_slider5.value})^2 = {_s:,.1f}$ m"
     )
     return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    v_slider5 = mo.ui.slider(start=0, stop=40, step=1, value=25, label="final velocity, $v$ (m/s)", debounce=True)
-    a_slider5 = mo.ui.slider(start=-10, stop=10, step=0.5, value=-4, label="acceleration, $a$ (m/s²)", debounce=True)
-    t_slider5 = mo.ui.slider(start=0.5, stop=10, step=0.5, value=3, label="time, $t$ (s)", debounce=True)
-    mo.hstack([v_slider5, a_slider5, t_slider5], justify="start", gap=2)
-    return a_slider5, t_slider5, v_slider5
 
 
 @app.cell(hide_code=True)
@@ -730,10 +753,10 @@ def _(mo):
 def _(NumericEntryWidget, mo):
     q5_check = mo.ui.anywidget(
         NumericEntryWidget(
-            question="A skier's velocity is 18 m/s at the bottom of a slope, after decelerating at 1 m/s² for 6 s along a flat run-out. Calculate the distance travelled during that interval, in m.",
-            correct_answer=18 * 6 - 0.5 * 1 * 6**2,
+            question="A skier decelerates at 1 m/s² for 6 s along a flat run-out, and is travelling at 18 m/s at the end of that time. Calculate the distance travelled during the 6 s, in m.",
+            correct_answer=18 * 6 - 0.5 * (-1) * 6**2,
             tolerance=0.5,
-            explanation="s = vt − ½at² = (18)(6) − ½(1)(6)² = 108 − 18 = 90 m",
+            explanation="Decelerating, so a = −1. s = vt − ½at² = (18)(6) − ½(−1)(6)² = 108 + 18 = 126 m",
         )
     )
     q5_check
